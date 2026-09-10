@@ -219,9 +219,37 @@ local function onCharacterAdded(player: Player, character: Model)
 		return
 	end
 
-	-- Diagnostic: nothing here changes a player's appearance, so if an avatar
-	-- looks wrong this line says whether the place is forcing R6.
-	print(string.format("[Player] %s spawned as %s.", player.Name, humanoid.RigType.Name))
+	--[[
+		Strip anything beast-shaped off the player.
+
+		No current code puts fire, feathers or wings on a player - that was
+		removed when the burning noob became an NPC. But an older build synced
+		into Studio can leave scripts behind that Rojo failed to delete, and
+		the symptom would be exactly this: spawning as the beast instead of
+		yourself. This clears it and reports it, rather than letting a stale
+		script quietly transform the player on every spawn.
+	]]
+	local stripped = 0
+	for _, item in character:GetDescendants() do
+		local isBeastPart = item:IsA("BasePart")
+			and (item.Name == "Feather" or string.match(item.Name, "^Wing") ~= nil)
+		local isBeastEffect = (item:IsA("ParticleEmitter") and item.Name == "BodyFire")
+			or (item:IsA("PointLight") and item.Name == "FireLight")
+
+		if isBeastPart or isBeastEffect then
+			item:Destroy()
+			stripped += 1
+		end
+	end
+
+	print(
+		string.format(
+			"[Player] %s spawned as %s%s.",
+			player.Name,
+			humanoid.RigType.Name,
+			if stripped > 0 then string.format(" (stripped %d leftover beast parts)", stripped) else ""
+		)
+	)
 
 	humanoid.MaxHealth = Config.Player.MaxHealth
 	humanoid.Health = Config.Player.MaxHealth

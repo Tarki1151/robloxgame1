@@ -495,10 +495,18 @@ Config.Pose = {
 	regardless of whether any of this plays.
 ]]
 Config.Vfx = {
-	-- Classic Roblox sword sounds.
-	SlashSound = "rbxassetid://12222216",
-	HitSound = "rbxassetid://12222225",
-	FlameSound = "rbxassetid://1836147015",
+	--[[
+		Sounds that ship with the client rather than uploaded assets.
+
+		rbxassetid:// sounds are downloaded, so they fail when Studio has no
+		asset access, and can break entirely if the uploader gets moderated -
+		which is what happened to the sword hit sound. rbxasset:// paths are
+		files inside Roblox itself: no download, no moderation, and they work
+		offline. These three are the original classic sword and rocket sounds.
+	]]
+	SlashSound = "rbxasset://sounds/swordslash.wav",
+	HitSound = "rbxasset://sounds/unsheath.wav",
+	FlameSound = "rbxasset://sounds/Rocket whoosh 01.wav",
 	-- Blade trail while a swing is live.
 	TrailLifetime = 0.32,
 	TrailWidth = 1.1,

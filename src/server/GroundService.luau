@@ -52,6 +52,9 @@ local function paintBaseplate(part: BasePart)
 	part.Color = Config.Ground.FallbackColor
 	part.Material = Config.Ground.FallbackMaterial
 	part.Reflectance = 0
+	-- Undo the hiding, in case terrain was used on a previous run.
+	part.Transparency = 0
+	part.CanCollide = true
 	for _, child in part:GetChildren() do
 		if child:IsA("Texture") or child:IsA("Decal") or child:IsA("SurfaceAppearance") then
 			child:Destroy()
@@ -117,6 +120,24 @@ local function fillGrass(size: number)
 	end
 end
 
+-- Removes terrain this service laid, so switching back to a plain baseplate
+-- does not leave grass floating over it.
+local function clearTerrain(): boolean
+	local terrain = workspace.Terrain
+	if terrain:CountCells() == 0 then
+		return false
+	end
+
+	local half = Config.Ground.MaxSize / 2
+	local region = Region3.new(
+		Vector3.new(-half, -Config.Ground.Depth * 4, -half),
+		Vector3.new(half, Config.Ground.Depth * 4, half)
+	):ExpandToGrid(4)
+
+	terrain:FillRegion(region, 4, Enum.Material.Air)
+	return true
+end
+
 function GroundService:Start()
 	if Config.Ground.UseTerrain then
 		local size = measureGround()
@@ -124,8 +145,17 @@ function GroundService:Start()
 		fillGrass(size)
 		print(string.format("[Ground] %d studs of grass laid, %d baseplates hidden.", size, hidden))
 	else
+		-- Terrain from an earlier run would sit at the same height as the
+		-- baseplate and flicker against it, so it goes.
+		local cleared = clearTerrain()
 		local painted = eachGroundPart(paintBaseplate)
-		print(string.format("[Ground] %d ground parts painted grass.", painted))
+		print(
+			string.format(
+				"[Ground] %d ground parts painted grass, terrain %s.",
+				painted,
+				if cleared then "cleared" else "none"
+			)
+		)
 	end
 end
 

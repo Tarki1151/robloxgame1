@@ -8,10 +8,11 @@
 local Config = {}
 
 Config.Ground = {
-	-- Terrain grass rather than a green baseplate: terrain renders actual
-	-- grass blades, takes footstep sounds, and can be sculpted later.
-	-- Set false to recolour the existing baseplate instead.
-	UseTerrain = true,
+	-- false: keep the baseplate solid and visible, painted grass green, and
+	-- clear any terrain previously laid over it. true: terrain grass instead,
+	-- with the baseplate hidden underneath so the two surfaces do not
+	-- z-fight at the same height.
+	UseTerrain = false,
 	-- How far the grass reaches. The area is measured from the ground already
 	-- in the place, so the grass covers all of it rather than leaving a
 	-- square of baseplate showing around the edges. These are the bounds of

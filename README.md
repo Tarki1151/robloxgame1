@@ -3,10 +3,11 @@
 An empty Rojo project, ready for a new Roblox game.
 
 The toolchain and CI are set up. The only gameplay code is `GroundService`,
-which lays terrain grass over the world and hides the stock baseplate
-underneath it. Grass colour, area and depth are in `Config.Ground`; set
-`UseTerrain = false` there to paint the baseplate green instead of using
-terrain.
+which makes the ground grass. By default it paints the baseplate grass green
+and leaves it solid and visible. Set `Config.Ground.UseTerrain = true` for
+real terrain grass instead, which renders grass blades and can be sculpted -
+that mode hides the baseplate underneath, since two solid surfaces at the
+same height flicker against each other.
 
 ## Setup
 

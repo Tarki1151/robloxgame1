@@ -17,7 +17,6 @@ local EVENTS = {
 	"EquipWeapon",
 	-- Server -> Client
 	"BeastChanged",
-	"Hit",
 	"WalletChanged",
 }
 

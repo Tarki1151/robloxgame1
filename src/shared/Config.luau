@@ -490,10 +490,8 @@ Config.Pose = {
 	BlendSpeed = 8,
 }
 
---[[
-	Hit feel. Every one of these is cosmetic - damage is decided on the server
-	regardless of whether any of this plays.
-]]
+-- Sounds only. The visual effects (blade trails, slash arcs, impact sparks,
+-- camera shake, screen flash) were removed.
 Config.Vfx = {
 	--[[
 		Sounds that ship with the client rather than uploaded assets.
@@ -502,27 +500,11 @@ Config.Vfx = {
 		asset access, and can break entirely if the uploader gets moderated -
 		which is what happened to the sword hit sound. rbxasset:// paths are
 		files inside Roblox itself: no download, no moderation, and they work
-		offline. These three are the original classic sword and rocket sounds.
+		offline. These are the original classic sword and rocket sounds.
 	]]
 	SlashSound = "rbxasset://sounds/swordslash.wav",
 	HitSound = "rbxasset://sounds/unsheath.wav",
 	FlameSound = "rbxasset://sounds/Rocket whoosh 01.wav",
-	-- Blade trail while a swing is live.
-	TrailLifetime = 0.32,
-	TrailWidth = 1.1,
-	TrailColor = Color3.fromRGB(255, 255, 255),
-	-- The arc that sweeps out of the blade on a swing.
-	SlashArcSize = Vector3.new(11, 0.35, 3.4),
-	SlashArcLifetime = 0.18,
-	-- Sparks where a hit lands.
-	SparkCount = 26,
-	SparkSpeed = NumberRange.new(14, 32),
-	SparkColor = Color3.fromRGB(255, 214, 140),
-	-- Camera kick when you take damage: studs of shake and how fast it decays.
-	ShakeMagnitude = 1.6,
-	ShakeDecay = 5.5,
-	-- How far a hit shoves the target.
-	Knockback = 22,
 }
 
 Config.Ui = {

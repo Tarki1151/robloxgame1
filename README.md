@@ -123,7 +123,6 @@ Everything visual lives in `src/shared/Config.luau`; edit and it syncs live:
 | `Special.Interval` / `Damage` / `Speed` | the flame attack |
 | `Sword.Cooldown` / `HitWindow` | swing rate and how long a swing can hit |
 | `Craft.RewardPerKill` | embers per beast |
-| `Vfx.*` | trails, sparks, sounds, knockback, camera shake |
 | `Wings.FeathersPerRow` / `Rows` | feather count - the first thing to cut if it slows down |
 
 ## Layout
@@ -146,7 +145,6 @@ src/
     HealthController   your health bar
     BeastMenuController the FIGHT BEAST button and the roster grid
     ShopController     the CRAFT button, the forge panel, the ember counter
-    ImpactController   camera shake and damage flash
 ```
 
 ## Commands

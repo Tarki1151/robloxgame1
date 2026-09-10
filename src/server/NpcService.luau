@@ -320,7 +320,6 @@ local function launchFlame(npc: Npc, targetRoot: BasePart)
 					and (root.Position - flame.Position).Magnitude <= Config.Special.HitRadius * scale
 				then
 					humanoid:TakeDamage(npc.beast.SpecialDamage)
-					Remotes.event("Hit"):FireClient(player, "flame", flame.Position)
 					flame:Destroy()
 					return
 				end
@@ -397,11 +396,6 @@ local function think(npc: Npc)
 	npc.swingUntil = now + Config.Pose.SwingDuration
 
 	targetHumanoid:TakeDamage(npc.beast.Damage)
-
-	local victim = Players:GetPlayerFromCharacter(targetHumanoid.Parent)
-	if victim then
-		Remotes.event("Hit"):FireClient(victim, "melee", npc.root.Position)
-	end
 end
 
 function NpcService:GetNpcs(): { [Model]: Npc }

@@ -50,47 +50,6 @@ function WeaponFactory.build(weapon): Tool
 	weld.C0 = CFrame.new(0, -weapon.Reach / 2 + 0.5, 0)
 	weld.Parent = handle
 
-	-- A Trail needs two attachments to stretch between: tip and base of the
-	-- blade. It stays disabled until a swing starts, so the weapon does not
-	-- smear while you walk around.
-	local tip = Instance.new("Attachment")
-	tip.Name = "TrailTip"
-	tip.Position = Vector3.new(0, weapon.Reach / 2, 0)
-	tip.Parent = handle
-
-	local base = Instance.new("Attachment")
-	base.Name = "TrailBase"
-	base.Position = Vector3.new(0, -weapon.Reach / 4, 0)
-	base.Parent = handle
-
-	local trail = Instance.new("Trail")
-	trail.Name = "SlashTrail"
-	trail.Attachment0 = tip
-	trail.Attachment1 = base
-	trail.Lifetime = Config.Vfx.TrailLifetime
-	trail.MinLength = 0.1
-	trail.WidthScale = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1),
-		NumberSequenceKeypoint.new(1, 0),
-	})
-	trail.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.15),
-		NumberSequenceKeypoint.new(1, 1),
-	})
-	trail.Color = ColorSequence.new(if weapon.Glow then weapon.BladeColor else Config.Vfx.TrailColor)
-	trail.LightEmission = 0.8
-	trail.FaceCamera = true
-	trail.Enabled = false
-	trail.Parent = handle
-
-	if weapon.Glow then
-		local light = Instance.new("PointLight")
-		light.Color = weapon.BladeColor
-		light.Brightness = 2
-		light.Range = 12
-		light.Parent = handle
-	end
-
 	local slashSound = Instance.new("Sound")
 	slashSound.Name = "Slash"
 	slashSound.SoundId = Config.Vfx.SlashSound

@@ -8,7 +8,6 @@ local CONTROLLERS = {
 	"HealthController",
 	"BeastMenuController",
 	"ShopController",
-	"ImpactController",
 }
 
 for _, name in CONTROLLERS do

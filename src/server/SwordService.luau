@@ -14,93 +14,13 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Debris = game:GetService("Debris")
-
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
-local Remotes = require(Shared.Remotes)
-
 local CraftService = require(script.Parent.CraftService)
 local WeaponFactory = require(script.Parent.WeaponFactory)
 
 local SwordService = {}
 
--- Sparks and a flash where a blow lands.
-local function impact(position: Vector3, color: Color3)
-	local origin = Instance.new("Part")
-	origin.Name = "Impact"
-	origin.Size = Vector3.new(0.2, 0.2, 0.2)
-	origin.Position = position
-	origin.Transparency = 1
-	origin.Anchored = true
-	origin.CanCollide = false
-	origin.CanQuery = false
-	origin.CanTouch = false
-	origin.Parent = workspace
-
-	local attachment = Instance.new("Attachment")
-	attachment.Parent = origin
-
-	local sparks = Instance.new("ParticleEmitter")
-	sparks.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	sparks.Color = ColorSequence.new(color)
-	sparks.Lifetime = NumberRange.new(0.2, 0.45)
-	sparks.Speed = Config.Vfx.SparkSpeed
-	sparks.SpreadAngle = Vector2.new(180, 180)
-	sparks.LightEmission = 1
-	sparks.Rate = 0
-	sparks.Size = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.9),
-		NumberSequenceKeypoint.new(1, 0),
-	})
-	sparks.Parent = attachment
-	sparks:Emit(Config.Vfx.SparkCount)
-
-	local flash = Instance.new("PointLight")
-	flash.Color = color
-	flash.Brightness = 6
-	flash.Range = 14
-	flash.Parent = origin
-
-	Debris:AddItem(origin, 0.6)
-end
-
--- The arc that sweeps out of the blade, sold as a thin curved slab that
--- stretches and fades. Purely cosmetic, and it never touches anything.
-local function slashArc(handle: BasePart)
-	local arc = Instance.new("Part")
-	arc.Name = "SlashArc"
-	arc.Size = Config.Vfx.SlashArcSize
-	arc.CFrame = handle.CFrame * CFrame.new(0, 1.4, -1.2) * CFrame.Angles(0, 0, math.rad(35))
-	arc.Color = Config.Vfx.TrailColor
-	arc.Material = Enum.Material.Neon
-	arc.Transparency = 0.35
-	arc.Anchored = true
-	arc.CanCollide = false
-	arc.CanQuery = false
-	arc.CanTouch = false
-	arc.CastShadow = false
-	arc.Parent = workspace
-
-	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshType = Enum.MeshType.Sphere
-	mesh.Scale = Vector3.new(1, 0.12, 0.6)
-	mesh.Parent = arc
-
-	task.spawn(function()
-		local elapsed = 0
-		while elapsed < Config.Vfx.SlashArcLifetime and arc.Parent do
-			elapsed += task.wait()
-			local progress = elapsed / Config.Vfx.SlashArcLifetime
-			arc.Transparency = 0.35 + progress * 0.65
-			mesh.Scale = Vector3.new(1 + progress * 0.7, 0.12, 0.6)
-		end
-		arc:Destroy()
-	end)
-end
-
--- Removes whatever weapon the player is holding, so equipping a new one
--- never leaves the old one in the backpack.
 local function clearWeapons(player: Player)
 	local containers = { player:FindFirstChildOfClass("Backpack"), player.Character }
 	for _, container in containers do
@@ -163,24 +83,10 @@ local function equip(player: Player, weaponIndex: number?)
 		local damage = tool:GetAttribute("Damage") or 0
 		victim:TakeDamage(damage)
 
-		impact(hit.Position, Config.Vfx.SparkColor)
-
 		local hitSound = handle:FindFirstChild("Hit")
 		if hitSound and hitSound:IsA("Sound") then
 			hitSound:Play()
 		end
-
-		-- Shove the target away from the swing. Anchored things ignore this,
-		-- which is what we want: only characters get knocked back.
-		local victimRoot = hitCharacter:FindFirstChild("HumanoidRootPart")
-		if victimRoot and victimRoot:IsA("BasePart") and not victimRoot.Anchored then
-			local away = (victimRoot.Position - handle.Position)
-			if away.Magnitude > 0.1 then
-				victimRoot.AssemblyLinearVelocity += away.Unit * Config.Vfx.Knockback
-			end
-		end
-
-		Remotes.event("Hit"):FireClient(player, "landed", hit.Position)
 	end)
 
 	tool.Activated:Connect(function()
@@ -192,20 +98,10 @@ local function equip(player: Player, weaponIndex: number?)
 		swingUntil = now + Config.Sword.HitWindow
 		table.clear(struck)
 
-		local trail = handle:FindFirstChild("SlashTrail")
-		if trail and trail:IsA("Trail") then
-			trail.Enabled = true
-			task.delay(Config.Sword.HitWindow, function()
-				trail.Enabled = false
-			end)
-		end
-
 		local slashSound = handle:FindFirstChild("Slash")
 		if slashSound and slashSound:IsA("Sound") then
 			slashSound:Play()
 		end
-
-		slashArc(handle)
 	end)
 
 	tool.Parent = backpack
@@ -219,37 +115,7 @@ local function onCharacterAdded(player: Player, character: Model)
 		return
 	end
 
-	--[[
-		Strip anything beast-shaped off the player.
-
-		No current code puts fire, feathers or wings on a player - that was
-		removed when the burning noob became an NPC. But an older build synced
-		into Studio can leave scripts behind that Rojo failed to delete, and
-		the symptom would be exactly this: spawning as the beast instead of
-		yourself. This clears it and reports it, rather than letting a stale
-		script quietly transform the player on every spawn.
-	]]
-	local stripped = 0
-	for _, item in character:GetDescendants() do
-		local isBeastPart = item:IsA("BasePart")
-			and (item.Name == "Feather" or string.match(item.Name, "^Wing") ~= nil)
-		local isBeastEffect = (item:IsA("ParticleEmitter") and item.Name == "BodyFire")
-			or (item:IsA("PointLight") and item.Name == "FireLight")
-
-		if isBeastPart or isBeastEffect then
-			item:Destroy()
-			stripped += 1
-		end
-	end
-
-	print(
-		string.format(
-			"[Player] %s spawned as %s%s.",
-			player.Name,
-			humanoid.RigType.Name,
-			if stripped > 0 then string.format(" (stripped %d leftover beast parts)", stripped) else ""
-		)
-	)
+	print(string.format("[Player] %s spawned as %s.", player.Name, humanoid.RigType.Name))
 
 	humanoid.MaxHealth = Config.Player.MaxHealth
 	humanoid.Health = Config.Player.MaxHealth

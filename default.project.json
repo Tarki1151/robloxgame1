@@ -44,12 +44,12 @@
           26,
           34
         ],
-        "Brightness": 2,
+        "Brightness": 1.6,
         "ClockTime": 18.5,
         "GeographicLatitude": 12,
-        "ExposureCompensation": 0.25,
-        "EnvironmentDiffuseScale": 0.6,
-        "EnvironmentSpecularScale": 0.7,
+        "ExposureCompensation": 0,
+        "EnvironmentDiffuseScale": 0.4,
+        "EnvironmentSpecularScale": 0.4,
         "GlobalShadows": true,
         "ShadowSoftness": 0.35,
         "FogEnd": 900,
@@ -63,35 +63,35 @@
       "Atmosphere": {
         "$className": "Atmosphere",
         "$properties": {
-          "Density": 0.38,
+          "Density": 0.28,
           "Offset": 0.1,
           "Color": [
-            190,
-            165,
-            160
+            150,
+            142,
+            148
           ],
           "Decay": [
-            96,
             70,
-            76
+            60,
+            68
           ],
-          "Glare": 0.35,
-          "Haze": 1.8
+          "Glare": 0,
+          "Haze": 0.2
         }
       },
       "Bloom": {
         "$className": "BloomEffect",
         "$properties": {
-          "Intensity": 0.9,
-          "Size": 28,
-          "Threshold": 1.1
+          "Intensity": 0.45,
+          "Size": 24,
+          "Threshold": 2
         }
       },
       "SunRays": {
         "$className": "SunRaysEffect",
         "$properties": {
-          "Intensity": 0.14,
-          "Spread": 0.9
+          "Intensity": 0.06,
+          "Spread": 0.6
         }
       },
       "ColorGrade": {

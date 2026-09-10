@@ -59,26 +59,70 @@ local function paintBaseplate(part: BasePart)
 	end
 end
 
-local function fillGrass()
+-- How far the existing ground reaches, so the grass can cover all of it.
+-- Without this the grass is a fixed square sitting in the middle of a larger
+-- baseplate, with grey showing all around it.
+local function measureGround(): number
+	local reach = 0
+
+	for _, item in workspace:GetDescendants() do
+		if isGround(item) then
+			local part = item :: BasePart
+			-- Half-extents plus however far the part sits from the origin.
+			reach = math.max(
+				reach,
+				math.abs(part.Position.X) + part.Size.X / 2,
+				math.abs(part.Position.Z) + part.Size.Z / 2
+			)
+		end
+	end
+
+	local size = reach * 2 + Config.Ground.Margin * 2
+	return math.clamp(size, Config.Ground.MinSize, Config.Ground.MaxSize)
+end
+
+local function fillGrass(size: number)
 	local terrain = workspace.Terrain
 
 	terrain.Decoration = Config.Ground.Decoration
 	terrain:SetMaterialColor(Enum.Material.Grass, Config.Ground.GrassColor)
 	terrain:SetMaterialColor(Enum.Material.Ground, Config.Ground.GroundColor)
 
-	-- The block's top sits at y = 0, so spawns and parts placed at ground
-	-- level still land on the surface rather than inside it.
-	local size = Config.Ground.Size
 	local depth = Config.Ground.Depth
+	local chunk = Config.Ground.ChunkSize
+	local half = size / 2
 
-	terrain:FillBlock(CFrame.new(0, -depth / 2, 0), Vector3.new(size, depth, size), Enum.Material.Grass)
+	--[[
+		Filled in chunks, yielding between each row.
+
+		A single FillBlock over a large area blocks the server while it writes
+		every voxel, stalling the whole game for as long as it takes. In chunks
+		the server keeps running and the grass appears progressively.
+
+		The block's top sits at y = 0, so spawns and parts placed at ground
+		level land on the surface rather than inside it.
+	]]
+	for x = -half, half - 1, chunk do
+		for z = -half, half - 1, chunk do
+			local width = math.min(chunk, half - x)
+			local length = math.min(chunk, half - z)
+
+			terrain:FillBlock(
+				CFrame.new(x + width / 2, -depth / 2, z + length / 2),
+				Vector3.new(width, depth, length),
+				Enum.Material.Grass
+			)
+		end
+		task.wait()
+	end
 end
 
 function GroundService:Start()
 	if Config.Ground.UseTerrain then
-		fillGrass()
+		local size = measureGround()
 		local hidden = eachGroundPart(hideBaseplate)
-		print(string.format("[Ground] grass terrain laid, %d baseplates hidden.", hidden))
+		fillGrass(size)
+		print(string.format("[Ground] %d studs of grass laid, %d baseplates hidden.", size, hidden))
 	else
 		local painted = eachGroundPart(paintBaseplate)
 		print(string.format("[Ground] %d ground parts painted grass.", painted))

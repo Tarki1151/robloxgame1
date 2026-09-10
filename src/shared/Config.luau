@@ -12,9 +12,19 @@ Config.Ground = {
 	-- grass blades, takes footstep sounds, and can be sculpted later.
 	-- Set false to recolour the existing baseplate instead.
 	UseTerrain = true,
-	-- Studs across, and how deep the soil goes below the surface.
-	Size = 512,
-	Depth = 20,
+	-- How far the grass reaches. The area is measured from the ground already
+	-- in the place, so the grass covers all of it rather than leaving a
+	-- square of baseplate showing around the edges. These are the bounds of
+	-- that measurement.
+	MinSize = 512,
+	MaxSize = 2048,
+	-- Studs of grass past the edge of the ground, so there is no visible seam.
+	Margin = 64,
+	-- How deep the soil goes below the surface.
+	Depth = 16,
+	-- Terrain is filled in chunks this wide, yielding between them. Filling a
+	-- large area in one call freezes the server while it works.
+	ChunkSize = 256,
 	-- Waving grass blades on the surface. Turn off if it costs frames.
 	Decoration = true,
 	-- Grass colour. Terrain materials are tinted, not textured over.

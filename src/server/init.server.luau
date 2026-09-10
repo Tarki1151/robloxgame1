@@ -15,6 +15,7 @@ local SERVICES = {
 	"NetworkService",
 	"LeaderstatsService",
 	"ToolVisualService",
+	"BirdService",
 	"CollectService",
 	"ShopService",
 	"RebirthService",

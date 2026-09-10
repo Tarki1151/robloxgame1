@@ -1,9 +1,9 @@
 # robloxgame1
 
-Rojo tabanli bir Roblox **simulator** oyunu iskeleti. Klasik dongu hazir ve
-calisir durumda:
+Rojo tabanli bir Roblox **av simulatoru**. Klasik dongu hazir ve calisir
+durumda:
 
-> topla -> canta dolar -> satis padine yuru -> para kazan -> arac/canta yukselt -> rebirth
+> kus vur -> canta dolar -> satis padine yuru -> para kazan -> tufek/canta yukselt -> rebirth
 
 Kod tarafinda hicbir sey Studio'da elle olusturulmus nesnelere bagimli degil;
 sahne bos olsa bile sunucu gerekli placeholder parcalarini kendisi kurar.
@@ -66,11 +66,12 @@ src/
     init.server.luau   Servisleri sirayla baslatan bootstrap
     DataService        DataStore + oturum kilidi + autosave + reconcile
     EconomyService     Para, canta doluluğu, satis, carpanlar
-    CollectService     Toplama istegi + anti-exploit dogrulamalari
+    CollectService     Atis istegi + nisan/menzil + anti-exploit dogrulamalari
+    BirdService        Av alaninda ucusan kuslar, vurulanin yerine yenisi
     ShopService        Arac / canta satin alma
     RebirthService     Rebirth dongusu
-    WorldService       Toplama alani + satis padi (CollectionService etiketli)
-    ToolVisualService  ToolIndex'i elde gorunen bir Tool'a cevirir
+    WorldService       Av alani + satis padi (CollectionService etiketli)
+    ToolVisualService  ToolIndex'i elde gorunen bir tufege cevirir
     NetworkService     Client'a durum fotografi gonderir
     LeaderstatsService Oyuncu listesi tablosu
 
@@ -89,8 +90,10 @@ src/
 ## Mimari kurallari
 
 **Sunucu otoritedir.** Client hicbir zaman para, kaynak veya sahiplik
-hesaplamaz. `Collect` remote'u parametresiz calisir: "toplamak istiyorum" der,
-kazanci sunucu kendi profilinden okur. `BuyTool`/`BuyBackpack` bir index alir
+hesaplamaz. `Collect` remote'u parametresiz calisir: "ates ettim" der; hangi
+kusun vuruldugunu, menzil ve nisan konisini, kazancin ne oldugunu sunucu
+belirler. Client hedef bilgisi gondermez, dolayisiyla "her atis isabet"
+exploit'i mumkun degil. `BuyTool`/`BuyBackpack` bir index alir
 ama sunucu o index'i sinir, sira ve fiyat acisindan yeniden dogrular.
 
 **Tek yazma noktasi.** Profile yapilan her degisiklik `DataService:Update()`
@@ -121,11 +124,34 @@ Birden fazla alan/pad destekleniyor.
 
 ---
 
-## Arac modelleri
+## Av dongusu
+
+`BirdService` av alaninin uzerinde `Config.Birds.Count` kadar kusu daire
+cizerek ucurur. Kuslar tamamen sunucuda hareket eder (govde `Anchored`,
+konumu her `Heartbeat`'te sunucu yazar).
+
+Ates edince `CollectService`:
+
+1. Cooldown ve av alani sinirini dogrular,
+2. Namlu ucundan bakip menzil (`Config.Collect.Range`) ve nisan konisi
+   (`Config.Collect.AimTolerance`) icindeki en iyi hizalanmis kusu secer,
+3. Kusu dusurur ve tufegin `Power` degeri kadar kaynagi cantaya ekler.
+
+Nisan yonu `HumanoidRootPart`'in bakis yonunden okunur — karakter kameranin
+baktigi yone doner. Dikey aci serbesttir: kuslar yukarida ucar, oyuncunun
+havaya nisan almasi gerekmez. Isabet yoksa sadece iz efekti cikar, kazanc
+olmaz.
+
+Vurulan kus `Config.Birds.RespawnDelay` sonra yenisiyle degisir; havadaki kus
+sayisi sabit kalir.
+
+---
+
+## Tufek modelleri
 
 `ToolVisualService`, profildeki `ToolIndex` her degistiginde (ve her respawn'da)
-karaktere ilgili araci takar. Model bulunamazsa basit bir placeholder kazma
-uretir, yani bos sahnede de elinde bir sey gorunur.
+karaktere ilgili tufegi takar. Model bulunamazsa basit bir placeholder tufek
+uretir (dipcik + govde + namlu), yani bos sahnede de elinde bir sey gorunur.
 
 Kendi modelini koymak icin:
 
@@ -133,11 +159,13 @@ Kendi modelini koymak icin:
 2. Icine bir **Tool** koy; adi `Config.Tools` icindeki `Name` ile ayni olsun
    (veya girdiye `Model = "BaskaAd"` yaz).
 3. Tool'un `Handle` adinda bir parcasi olmali — Roblox ele bunu takar.
+   Handle'in uzun eksenini namlu yonunde (Z) uzat: `CollectService` namlu
+   ucunu `Handle.CFrame.LookVector` uzerinden hesaplar.
 
 Placeholder uretimini tamamen kapatmak icin
 `Config.ToolVisual.CreatePlaceholders = false` yap.
 
-Gorsel katman otoriter degildir: toplama gucu `Config.Tools[i].Power`'dan
+Gorsel katman otoriter degildir: kus basina kazanc `Config.Tools[i].Power`'dan
 okunur, elde ne gorundugunden bagimsizdir. Servis hic calismasa da oyun aynen
 calisir.
 
@@ -178,7 +206,7 @@ Iskelette bilerek yer almayan, oyunu "gercek" yapan parcalar:
 - **Gamepass / Developer Product**: `MarketplaceService` ile 2x para, otomatik
   toplama, VIP alan. `ProcessReceipt` mutlaka `DataService` ile ayni oturum
   kilidini kullanmali.
-- **Bolgeler (areas)**: yuksek seviye toplama alanlari, rebirth veya para ile
+- **Bolgeler (areas)**: yuksek seviye av alanlari, rebirth veya para ile
   acilan kapilar. `WorldService`'e `RequiredRebirths` etiketi eklenebilir.
 - **Sunucu disi olay**: gunluk odul, saatlik boss.
 

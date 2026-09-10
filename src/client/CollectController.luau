@@ -1,7 +1,7 @@
 --[[
 	CollectController
-	Girdi katmani. Basili tutunca surekli toplar; kazanci client hesaplamaz,
-	sadece sunucuya "topla" sinyali gonderir.
+	Girdi katmani. Basili tutunca surekli ates eder; hedefi ve kazanci client
+	hesaplamaz, sadece sunucuya "ates ettim" sinyali gonderir.
 
 	Masaustu: sol tik. Mobil: ekrana dokunma. Konsol: ButtonR2.
 ]]
@@ -58,7 +58,7 @@ function CollectController:Start()
 		Enum.UserInputType.Touch,
 		Enum.KeyCode.ButtonR2
 	)
-	ContextActionService:SetTitle(ACTION_NAME, "TOPLA")
+	ContextActionService:SetTitle(ACTION_NAME, "ATES")
 
 	RunService.Heartbeat:Connect(tick)
 end

@@ -182,7 +182,7 @@ local function createPlaceholders()
 			Color3.fromRGB(122, 100, 200),
 			folder
 		)
-		label(zone, "TOPLAMA ALANI", Color3.fromRGB(200, 180, 255))
+		label(zone, "AV ALANI", Color3.fromRGB(200, 180, 255))
 		CollectionService:AddTag(zone, Config.World.CollectZoneTag)
 	end
 

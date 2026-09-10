@@ -24,11 +24,16 @@ Config.Data = {
 }
 
 Config.Collect = {
-	-- Sunucunun kabul ettigi minimum toplama araligi. Client bunun altina inerse
+	-- Sunucunun kabul ettigi minimum atis araligi. Client bunun altina inerse
 	-- istek sessizce dusurulur (basit anti-exploit).
 	Cooldown = 0.35,
-	-- Toplama alani sinir kontrolunde tolerans (stud). Lag payi.
+	-- Av alani sinir kontrolunde tolerans (stud). Lag payi.
 	ZonePadding = 8,
+	-- Tufegin menzili (stud).
+	Range = 220,
+	-- Nisan konisi. 1 = tam isabet gerekir, 0 = her yon sayilir.
+	-- Karakter kameranin baktigi yone doner; dikey aci otomatik tolere edilir.
+	AimTolerance = 0.82,
 }
 
 Config.Sell = {
@@ -45,18 +50,44 @@ Config.World = {
 	SellPadTag = "SellPad",
 }
 
--- Toplama araclari. Power = her toplama vurusunda kazanilan kaynak.
--- Color: ServerStorage'da model yoksa uretilen placeholder'in baslik rengi.
+-- Tufekler. Power = vurulan her kustan kazanilan kaynak.
+-- Color: ServerStorage'da model yoksa uretilen placeholder'in namlu rengi.
 -- Model (istege bagli): ServerStorage/ToolModels icindeki Tool'un adi.
 -- Yazmazsan Name ile aranir.
 Config.Tools = {
-	{ Name = "Rusty Pickaxe", Price = 0, Power = 1, Color = Color3.fromRGB(140, 105, 85) },
-	{ Name = "Iron Pickaxe", Price = 150, Power = 3, Color = Color3.fromRGB(170, 175, 180) },
-	{ Name = "Steel Drill", Price = 900, Power = 8, Color = Color3.fromRGB(120, 130, 145) },
-	{ Name = "Gold Drill", Price = 5_000, Power = 20, Color = Color3.fromRGB(226, 182, 62) },
-	{ Name = "Diamond Drill", Price = 28_000, Power = 55, Color = Color3.fromRGB(120, 220, 232) },
-	{ Name = "Plasma Cutter", Price = 160_000, Power = 150, Color = Color3.fromRGB(236, 96, 160) },
-	{ Name = "Quantum Ripper", Price = 950_000, Power = 420, Color = Color3.fromRGB(150, 110, 255) },
+	{ Name = "Eski Av Tufegi", Price = 0, Power = 1, Color = Color3.fromRGB(140, 105, 85) },
+	{ Name = "Cift Namlulu", Price = 150, Power = 3, Color = Color3.fromRGB(170, 175, 180) },
+	{ Name = "Pompali", Price = 900, Power = 8, Color = Color3.fromRGB(120, 130, 145) },
+	{ Name = "Altin Tufek", Price = 5_000, Power = 20, Color = Color3.fromRGB(226, 182, 62) },
+	{ Name = "Keskin Nisanci", Price = 28_000, Power = 55, Color = Color3.fromRGB(120, 220, 232) },
+	{ Name = "Plazma Tufegi", Price = 160_000, Power = 150, Color = Color3.fromRGB(236, 96, 160) },
+	{ Name = "Kuantum Tufegi", Price = 950_000, Power = 420, Color = Color3.fromRGB(150, 110, 255) },
+}
+
+-- Av alaninda ucusan kuslar. Kuslar sunucuda hareket eder ve vuruldugunda
+-- yeniden dogar; hicbir kazanc client tarafinda hesaplanmaz.
+Config.Birds = {
+	-- Ayni anda havada duran kus sayisi.
+	Count = 14,
+	-- Vurulduktan kac saniye sonra yerine yenisi gelir.
+	RespawnDelay = 2.5,
+	-- Av alani merkezine gore ucus yariçapi ve yuksekligi (stud).
+	Radius = 46,
+	MinHeight = 16,
+	MaxHeight = 32,
+	-- Tur basina hiz araligi (stud/sn).
+	MinSpeed = 12,
+	MaxSpeed = 24,
+	Size = Vector3.new(1.6, 0.7, 1),
+	-- Kanat cirpma hizi (saniyedeki tam vurus).
+	FlapSpeed = 6,
+	Colors = {
+		Color3.fromRGB(240, 240, 245),
+		Color3.fromRGB(80, 90, 110),
+		Color3.fromRGB(214, 120, 60),
+		Color3.fromRGB(120, 175, 220),
+	},
+	Tag = "Bird",
 }
 
 Config.ToolVisual = {
@@ -65,8 +96,8 @@ Config.ToolVisual = {
 	-- Model bulunamazsa sunucu basit bir kazma uretsin mi?
 	-- Tum araclarin kendi modeli varsa false yapabilirsin.
 	CreatePlaceholders = true,
-	-- Sadece placeholder icin: aracin elde durus acisi.
-	PlaceholderGrip = CFrame.Angles(0, math.rad(90), math.rad(-20)),
+	-- Sadece placeholder icin: tufegin elde durus acisi.
+	PlaceholderGrip = CFrame.new(0, -0.4, 0.6),
 }
 
 -- Sirt cantalari. Capacity = satmadan once tasinabilecek maksimum kaynak.

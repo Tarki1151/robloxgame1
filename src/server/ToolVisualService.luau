@@ -7,7 +7,7 @@
 	     (veya Config girdisindeki Model alaniyla) eslesen bir Tool varsa
 	     onun kopyasi kullanilir.
 	  2. Yoksa ve Config.ToolVisual.CreatePlaceholders acikssa sunucu basit bir
-	     kazma modeli uretir. Boylece bos bir sahnede de elde bir sey gorunur.
+	     tufek modeli uretir. Boylece bos bir sahnede de elde bir sey gorunur.
 
 	Gorsel katman otoriter degildir: hicbir kazanc hesabi buraya bagli degil.
 	Servis calismasa bile oyun aynen calisir, arac sadece gorunmez.
@@ -71,7 +71,10 @@ local function makePart(name: string, size: Vector3, color: Color3, material: En
 	return part
 end
 
--- Model bulunamadiginda kullanilan basit kazma: sap + baslik.
+-- Model bulunamadiginda kullanilan basit tufek: dipcik + govde + namlu.
+-- Handle'in uzun ekseni Z'dir; CollectService namlu ucunu Handle.LookVector
+-- uzerinden hesaplar, bu yuzden kendi modelini koyarken de Handle'i namlu
+-- yonunde uzat.
 local function buildPlaceholder(entry): Tool
 	local tool = Instance.new("Tool")
 	tool.Name = entry.Name
@@ -80,25 +83,35 @@ local function buildPlaceholder(entry): Tool
 	tool.Grip = Config.ToolVisual.PlaceholderGrip
 
 	local handle =
-		makePart("Handle", Vector3.new(0.35, 3.2, 0.35), Color3.fromRGB(105, 74, 48), Enum.Material.Wood)
+		makePart("Handle", Vector3.new(0.3, 0.42, 3.2), Color3.fromRGB(78, 54, 36), Enum.Material.Wood)
 	handle.Parent = tool
 
-	local head = makePart(
-		"Head",
-		Vector3.new(2.2, 0.45, 0.5),
-		entry.Color or Color3.fromRGB(170, 170, 175),
+	local barrel = makePart(
+		"Barrel",
+		Vector3.new(0.18, 0.18, 2.2),
+		entry.Color or Color3.fromRGB(90, 95, 105),
 		Enum.Material.Metal
 	)
-	head.CFrame = handle.CFrame * CFrame.new(0, 1.4, 0)
-	head.Parent = tool
+	barrel.CFrame = handle.CFrame * CFrame.new(0, 0.28, -1.2)
+	barrel.Parent = tool
+
+	local stock =
+		makePart("Stock", Vector3.new(0.32, 0.62, 0.9), Color3.fromRGB(58, 40, 28), Enum.Material.Wood)
+	stock.CFrame = handle.CFrame * CFrame.new(0, -0.12, 1.7)
+	stock.Parent = tool
 
 	-- WeldConstraint degil Weld: ofset sabit C0 ile tanimlanir, boylece Tool
-	-- ele takilip Handle isinlandiginda baslik yerinden kaymaz.
-	local weld = Instance.new("Weld")
-	weld.Part0 = handle
-	weld.Part1 = head
-	weld.C0 = CFrame.new(0, 1.4, 0)
-	weld.Parent = handle
+	-- ele takilip Handle isinlandiginda parcalar yerinden kaymaz.
+	local function weldTo(part: BasePart, offset: CFrame)
+		local weld = Instance.new("Weld")
+		weld.Part0 = handle
+		weld.Part1 = part
+		weld.C0 = offset
+		weld.Parent = handle
+	end
+
+	weldTo(barrel, CFrame.new(0, 0.28, -1.2))
+	weldTo(stock, CFrame.new(0, -0.12, 1.7))
 
 	return tool
 end

@@ -1,14 +1,9 @@
 --[[
-	Client bootstrap
-	Starts controllers in order. Same shape as the server bootstrap: a broken
-	controller warns and is skipped instead of taking the rest down with it.
+	Client bootstrap.
+	Empty on purpose: controllers get required and started from here.
 ]]
 
-local CONTROLLERS = {
-	"HealthController",
-	"BeastMenuController",
-	"ShopController",
-}
+local CONTROLLERS = {}
 
 for _, name in CONTROLLERS do
 	local module = script:FindFirstChild(name)

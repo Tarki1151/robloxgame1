@@ -1,20 +1,12 @@
 --[[
-	Server bootstrap
-	Starts services in a fixed order. ArenaService lays the ground before
-	NpcService puts anything on it, and PoseService poses what NpcService
-	spawned, so it comes after.
+	Server bootstrap.
+	Empty on purpose: services get required and started from here.
 
-	To add a service: drop a ModuleScript with a :Start() method into
-	src/server/ and add its name to the list below.
+	require() is wrapped as well as Start(), so a module that throws while
+	loading warns and is skipped instead of taking the whole server down.
 ]]
 
-local SERVICES = {
-	"CraftService",
-	"ArenaService",
-	"NpcService",
-	"PoseService",
-	"SwordService",
-}
+local SERVICES = {}
 
 for _, name in SERVICES do
 	local module = script:FindFirstChild(name)
@@ -23,10 +15,6 @@ for _, name in SERVICES do
 		continue
 	end
 
-	-- require() is wrapped too, not just Start(). A module that throws while
-	-- loading (a service calling DataStoreService at module scope in Studio,
-	-- say) would otherwise kill this whole loop and leave every later service
-	-- unstarted, with no obvious sign beyond one red line.
 	local loaded, service = pcall(require, module)
 	if not loaded then
 		warn(string.format("[Server] '%s' failed to load: %s", name, tostring(service)))

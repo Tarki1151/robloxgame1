@@ -46,14 +46,27 @@ Config.World = {
 }
 
 -- Toplama araclari. Power = her toplama vurusunda kazanilan kaynak.
+-- Color: ServerStorage'da model yoksa uretilen placeholder'in baslik rengi.
+-- Model (istege bagli): ServerStorage/ToolModels icindeki Tool'un adi.
+-- Yazmazsan Name ile aranir.
 Config.Tools = {
-	{ Name = "Rusty Pickaxe", Price = 0, Power = 1 },
-	{ Name = "Iron Pickaxe", Price = 150, Power = 3 },
-	{ Name = "Steel Drill", Price = 900, Power = 8 },
-	{ Name = "Gold Drill", Price = 5_000, Power = 20 },
-	{ Name = "Diamond Drill", Price = 28_000, Power = 55 },
-	{ Name = "Plasma Cutter", Price = 160_000, Power = 150 },
-	{ Name = "Quantum Ripper", Price = 950_000, Power = 420 },
+	{ Name = "Rusty Pickaxe", Price = 0, Power = 1, Color = Color3.fromRGB(140, 105, 85) },
+	{ Name = "Iron Pickaxe", Price = 150, Power = 3, Color = Color3.fromRGB(170, 175, 180) },
+	{ Name = "Steel Drill", Price = 900, Power = 8, Color = Color3.fromRGB(120, 130, 145) },
+	{ Name = "Gold Drill", Price = 5_000, Power = 20, Color = Color3.fromRGB(226, 182, 62) },
+	{ Name = "Diamond Drill", Price = 28_000, Power = 55, Color = Color3.fromRGB(120, 220, 232) },
+	{ Name = "Plasma Cutter", Price = 160_000, Power = 150, Color = Color3.fromRGB(236, 96, 160) },
+	{ Name = "Quantum Ripper", Price = 950_000, Power = 420, Color = Color3.fromRGB(150, 110, 255) },
+}
+
+Config.ToolVisual = {
+	-- Kendi Tool modellerini buraya koy: ServerStorage/ToolModels/<arac adi>
+	FolderName = "ToolModels",
+	-- Model bulunamazsa sunucu basit bir kazma uretsin mi?
+	-- Tum araclarin kendi modeli varsa false yapabilirsin.
+	CreatePlaceholders = true,
+	-- Sadece placeholder icin: aracin elde durus acisi.
+	PlaceholderGrip = CFrame.Angles(0, math.rad(90), math.rad(-20)),
 }
 
 -- Sirt cantalari. Capacity = satmadan once tasinabilecek maksimum kaynak.

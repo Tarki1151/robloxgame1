@@ -70,6 +70,7 @@ src/
     ShopService        Arac / canta satin alma
     RebirthService     Rebirth dongusu
     WorldService       Toplama alani + satis padi (CollectionService etiketli)
+    ToolVisualService  ToolIndex'i elde gorunen bir Tool'a cevirir
     NetworkService     Client'a durum fotografi gonderir
     LeaderstatsService Oyuncu listesi tablosu
 
@@ -120,6 +121,28 @@ Birden fazla alan/pad destekleniyor.
 
 ---
 
+## Arac modelleri
+
+`ToolVisualService`, profildeki `ToolIndex` her degistiginde (ve her respawn'da)
+karaktere ilgili araci takar. Model bulunamazsa basit bir placeholder kazma
+uretir, yani bos sahnede de elinde bir sey gorunur.
+
+Kendi modelini koymak icin:
+
+1. `ServerStorage` altina **ToolModels** adinda bir `Folder` ac.
+2. Icine bir **Tool** koy; adi `Config.Tools` icindeki `Name` ile ayni olsun
+   (veya girdiye `Model = "BaskaAd"` yaz).
+3. Tool'un `Handle` adinda bir parcasi olmali — Roblox ele bunu takar.
+
+Placeholder uretimini tamamen kapatmak icin
+`Config.ToolVisual.CreatePlaceholders = false` yap.
+
+Gorsel katman otoriter degildir: toplama gucu `Config.Tools[i].Power`'dan
+okunur, elde ne gorundugunden bagimsizdir. Servis hic calismasa da oyun aynen
+calisir.
+
+---
+
 ## Yeni veri alani ekleme
 
 `Config.DefaultProfile` icine alani ekle — hepsi bu. Eski kayitlar yuklenirken
@@ -150,9 +173,6 @@ wally install                 # Bagimlilik kur (su an bagimlilik yok)
 
 Iskelette bilerek yer almayan, oyunu "gercek" yapan parcalar:
 
-- **Arac modeli**: `EconomyService:GetTool()` sadece sayisal guc doner. Elindeki
-  aracin gorunmesi icin `ServerStorage`'a Tool modelleri koyup `ToolIndex`
-  degistiginde karaktere takan bir `ToolVisualService` ekle.
 - **Pet sistemi**: ikinci bir carpan katmani. `Config` icine `Pets` listesi ve
   profile `EquippedPets` alani eklemek yeterli baslangic.
 - **Gamepass / Developer Product**: `MarketplaceService` ile 2x para, otomatik

@@ -244,6 +244,10 @@ function BeastMenuController:Start()
 		panel.Visible = not panel.Visible
 	end)
 
+	-- Ask what is currently being fought: the spawn announcement may have gone
+	-- out before this client was listening.
+	Remotes.event("SelectBeast"):FireServer()
+
 	Remotes.event("BeastChanged").OnClientEvent:Connect(function(index, name, health)
 		current.Text = string.format("Now fighting: %d. %s  -  %s HP", index, name, abbreviate(health))
 	end)

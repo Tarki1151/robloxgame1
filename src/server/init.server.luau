@@ -1,8 +1,8 @@
 --[[
 	Server bootstrap
-	Starts services in a fixed order. CraftService owns wallets, so it comes
-	first; NpcService spawns the beast and PoseService poses it, so posing
-	comes after spawning.
+	Starts services in a fixed order. ArenaService lays the ground before
+	NpcService puts anything on it, and PoseService poses what NpcService
+	spawned, so it comes after.
 
 	To add a service: drop a ModuleScript with a :Start() method into
 	src/server/ and add its name to the list below.
@@ -10,6 +10,7 @@
 
 local SERVICES = {
 	"CraftService",
+	"ArenaService",
 	"NpcService",
 	"PoseService",
 	"SwordService",

@@ -413,13 +413,37 @@ function NpcService:Start()
 	folder.Name = "Npcs"
 	folder.Parent = workspace
 
-	spawnNpc(currentIndex)
+	--[[
+		Spawn when the first player arrives rather than at server start.
 
-	Remotes.event("SelectBeast").OnServerEvent:Connect(function(_player, index)
+		Spawning immediately raced the world: with nothing loaded yet the
+		beast could drop through an empty workspace and be destroyed by the
+		fallen-parts height before anyone saw it, which looked exactly like
+		"it never spawned". Waiting for a player also means the beast is not
+		walking around an empty server.
+	]]
+	local function ensureBeast()
+		if next(active) == nil then
+			spawnNpc(currentIndex)
+			print(string.format("[Npc] %s spawned.", Config.Beasts[currentIndex].Name))
+		end
+	end
+
+	Players.PlayerAdded:Connect(ensureBeast)
+	if #Players:GetPlayers() > 0 then
+		ensureBeast()
+	end
+
+	Remotes.event("SelectBeast").OnServerEvent:Connect(function(player, index)
 		-- The client sends a menu index and nothing else; anything that is not
 		-- a number in range is ignored rather than trusted.
 		if typeof(index) == "number" then
 			selectBeast(index)
+		else
+			-- No index means "tell me what is out there", which is how a
+			-- client that joined after the spawn fills in its label.
+			local beast = Config.Beasts[currentIndex]
+			Remotes.event("BeastChanged"):FireClient(player, currentIndex, beast.Name, beast.MaxHealth)
 		end
 	end)
 

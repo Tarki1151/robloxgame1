@@ -1,0 +1,7 @@
+# Rokit toolchain manifest — "rokit install" komutu bu araclari kurar.
+# Surumleri "rokit add <tool>" ile guncelleyebilirsin.
+[tools]
+rojo = "rojo-rbx/rojo@7.5.1"
+wally = "UpliftGames/wally@0.3.2"
+selene = "Kampfkarren/selene@0.27.1"
+stylua = "JohnnyMorganz/StyLua@2.0.2"

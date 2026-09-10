@@ -1,0 +1,14 @@
+[package]
+name = "tarki1151/robloxgame1"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+license = "MIT"
+
+# Iskelet bilerek sifir bagimlilikla geliyor; her sey kendi kodumuzda.
+# Ihtiyac duyarsan ornek eklemeler:
+#   ProfileStore = "madstudioroblox/profilestore@1.0.0"   # veri katmanini degistirmek icin
+#   Promise      = "evaera/promise@4.0.0"
+[dependencies]
+
+[dev-dependencies]

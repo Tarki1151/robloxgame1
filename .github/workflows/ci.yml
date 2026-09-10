@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        uses: CompeyDev/setup-rokit@v0.1.2
+
+      - name: Generate Roblox std for selene
+        run: selene generate-roblox-std
+
+      - name: Lint (selene)
+        run: selene src
+
+      - name: Format check (StyLua)
+        run: stylua --check src
+
+      - name: Build place
+        run: rojo build default.project.json --output build.rbxlx
+
+      - name: Upload place artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: place
+          path: build.rbxlx

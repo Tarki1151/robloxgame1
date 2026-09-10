@@ -1,0 +1,22 @@
+# Wally
+/Packages/
+/ServerPackages/
+/DevPackages/
+*.lock
+
+# Rojo / Studio ciktilari
+/build/
+sourcemap.json
+*.rbxl
+*.rbxlx
+*.rbxm
+*.rbxmx
+*.rbxl.lock
+*.rbxlx.lock
+
+# selene generate-roblox-std ciktisi
+roblox.toml
+
+# Editor / OS
+.DS_Store
+.vscode/

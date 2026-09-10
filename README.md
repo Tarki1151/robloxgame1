@@ -3,7 +3,17 @@
 An empty Rojo project, ready for a new Roblox game.
 
 The toolchain and CI are set up. The only gameplay code is `GroundService`,
-which makes the ground grass. By default it paints the baseplate grass green
+which makes the ground grass, and `WorldService`, which builds a castle in
+the distance, a cobbled path leading to its gate, and a signpost with an
+arrow pointing the way.
+
+The castle is built from parts at run time - four walls with battlements,
+corner towers with stepped roofs and banners, and a gatehouse - so there is
+no model to import and every dimension is a number in `Config.Castle`. The
+path and the sign both aim at the gate position the castle reports, rather
+than a location written down twice.
+
+`GroundService` By default it paints the baseplate grass green
 and leaves it solid and visible. Set `Config.Ground.UseTerrain = true` for
 real terrain grass instead, which renders grass blades and can be sculpted -
 that mode hides the baseplate underneath, since two solid surfaces at the

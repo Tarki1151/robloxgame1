@@ -1,14 +1,14 @@
 --[[
 	GroundService
-	Darkens the ground.
+	Lays the ground the world sits on.
 
-	The stock Studio baseplate is a bright light grey. Recolouring it is not
-	enough on its own: it also carries a light grid Texture, and on some
-	templates a SurfaceAppearance, which sit on top of the colour and keep it
-	looking bright whatever colour is underneath. Those are removed too.
+	By default this is real terrain grass, not a green baseplate: terrain
+	renders grass blades, gives proper footstep sounds, and can be sculpted
+	into hills later without replacing anything here.
 
-	Every large flat anchored part is treated as ground, not just the first,
-	since a place can have its floor split into several pieces.
+	The stock baseplate is hidden rather than deleted - made invisible and
+	non-collidable - so the terrain becomes the surface you stand on while the
+	original part is still there if you want it back.
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -26,11 +26,21 @@ local function isGround(item: Instance): boolean
 		and item.Size.Y <= 24
 end
 
-local function darken(part: BasePart)
-	part.Color = Config.Ground.Color
-	part.Material = Config.Ground.Material
-	part.Reflectance = 0
+local function eachGroundPart(handle: (BasePart) -> ()): number
+	local count = 0
+	for _, item in workspace:GetDescendants() do
+		if isGround(item) then
+			handle(item :: BasePart)
+			count += 1
+		end
+	end
+	return count
+end
 
+local function hideBaseplate(part: BasePart)
+	part.Transparency = 1
+	part.CanCollide = false
+	-- The grid texture would show through the grass otherwise.
 	for _, child in part:GetChildren() do
 		if child:IsA("Texture") or child:IsA("Decal") or child:IsA("SurfaceAppearance") then
 			child:Destroy()
@@ -38,19 +48,41 @@ local function darken(part: BasePart)
 	end
 end
 
-function GroundService:Start()
-	local count = 0
-
-	for _, item in workspace:GetDescendants() do
-		if isGround(item) then
-			darken(item :: BasePart)
-			count += 1
+local function paintBaseplate(part: BasePart)
+	part.Color = Config.Ground.FallbackColor
+	part.Material = Config.Ground.FallbackMaterial
+	part.Reflectance = 0
+	for _, child in part:GetChildren() do
+		if child:IsA("Texture") or child:IsA("Decal") or child:IsA("SurfaceAppearance") then
+			child:Destroy()
 		end
 	end
+end
 
-	-- A place built on terrain has no ground part to recolour; the count says
-	-- so rather than leaving you wondering why nothing changed.
-	print(string.format("[Ground] %d ground parts darkened.", count))
+local function fillGrass()
+	local terrain = workspace.Terrain
+
+	terrain.Decoration = Config.Ground.Decoration
+	terrain:SetMaterialColor(Enum.Material.Grass, Config.Ground.GrassColor)
+	terrain:SetMaterialColor(Enum.Material.Ground, Config.Ground.GroundColor)
+
+	-- The block's top sits at y = 0, so spawns and parts placed at ground
+	-- level still land on the surface rather than inside it.
+	local size = Config.Ground.Size
+	local depth = Config.Ground.Depth
+
+	terrain:FillBlock(CFrame.new(0, -depth / 2, 0), Vector3.new(size, depth, size), Enum.Material.Grass)
+end
+
+function GroundService:Start()
+	if Config.Ground.UseTerrain then
+		fillGrass()
+		local hidden = eachGroundPart(hideBaseplate)
+		print(string.format("[Ground] grass terrain laid, %d baseplates hidden.", hidden))
+	else
+		local painted = eachGroundPart(paintBaseplate)
+		print(string.format("[Ground] %d ground parts painted grass.", painted))
+	end
 end
 
 return GroundService

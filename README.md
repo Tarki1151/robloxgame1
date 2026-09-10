@@ -3,9 +3,10 @@
 An empty Rojo project, ready for a new Roblox game.
 
 The toolchain and CI are set up. The only gameplay code is `GroundService`,
-which darkens the stock baseplate: it recolours every large flat anchored
-part and strips the light grid texture that otherwise keeps it looking bright.
-Colour and material are in `Config.Ground`.
+which lays terrain grass over the world and hides the stock baseplate
+underneath it. Grass colour, area and depth are in `Config.Ground`; set
+`UseTerrain = false` there to paint the baseplate green instead of using
+terrain.
 
 ## Setup
 

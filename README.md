@@ -82,8 +82,13 @@ embers and crafted weapons last for the session and reset when you rejoin.
 ## Rig type does not matter
 
 The NPC is built part by part in `NpcRig` as a proper R6 rig, so it is always
-R6 no matter what Game Settings say. Your own avatar can be R6 or R15; nothing
-touches it.
+R6 no matter what Game Settings say.
+
+Nothing touches your own avatar - no code in this project reads or changes a
+player's appearance. If yours looks blocky and wrong, the place is set to
+force R6: **File > Game Settings > Avatar > Avatar Type**, set it back to
+**R15** or **Player Choice**. That setting was only ever needed back when the
+burning noob replaced your character.
 
 ## About the animation
 

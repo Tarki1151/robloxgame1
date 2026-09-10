@@ -405,9 +405,9 @@ Config.Beasts = {
 -- The ground. The stock Studio baseplate is a bright grey that washes out a
 -- black enemy, so it gets recoloured rather than left alone.
 Config.Arena = {
-	FloorColor = Color3.fromRGB(38, 36, 42),
+	FloorColor = Color3.fromRGB(24, 23, 28),
 	FloorMaterial = Enum.Material.Slate,
-	SpawnColor = Color3.fromRGB(58, 56, 64),
+	SpawnColor = Color3.fromRGB(44, 42, 50),
 	-- Only used when the place has no ground of its own.
 	Size = 400,
 }

@@ -19,7 +19,16 @@ for _, name in SERVICES do
 		continue
 	end
 
-	local service = require(module)
+	-- require() is wrapped too, not just Start(). A module that throws while
+	-- loading (a service calling DataStoreService at module scope in Studio,
+	-- say) would otherwise kill this whole loop and leave every later service
+	-- unstarted, with no obvious sign beyond one red line.
+	local loaded, service = pcall(require, module)
+	if not loaded then
+		warn(string.format("[Server] '%s' failed to load: %s", name, tostring(service)))
+		continue
+	end
+
 	if typeof(service) == "table" and typeof(service.Start) == "function" then
 		local success, err = pcall(function()
 			service:Start()

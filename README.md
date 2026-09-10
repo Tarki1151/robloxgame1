@@ -1,10 +1,21 @@
 # robloxgame1
 
-Every player spawns as the same figure: a pitch black classic noob, on fire,
-with six fire wings and a flaming sword, floating above the ground.
+Fight a burning noob.
 
-The look is forced server-side - accessories, clothing and the face from the
-player's own Roblox avatar are stripped on every spawn.
+You spawn as your normal Roblox avatar with 100 HP and a classic sword. An
+NPC - a pitch black classic noob, on fire, with six fire wings and a flaming
+sword - hunts you down with 200 HP.
+
+| | Health | Attack | Rate |
+| --- | --- | --- | --- |
+| You | 100 | Sword, 20 damage | every 0.6s |
+| Burning Noob | 200 | Melee, 10 damage | every 5s |
+| | | Flame projectile, 15 damage | every 15s |
+
+The flame is aimed where you stood when it launched, so it can be dodged by
+moving. Kill the noob and a new one spawns after 6 seconds.
+
+Your health bar sits at the bottom left; the noob's is over its head.
 
 ## Setup
 
@@ -34,13 +45,11 @@ Or build a place file without Studio:
 rojo build default.project.json --output game.rbxlx
 ```
 
-## Requires R6
+## Rig type does not matter
 
-The pose set drives R6 joints (`Right Shoulder`, `Left Hip`, `RootJoint`).
-In Studio: **File > Game Settings > Avatar > Rig Type > R6**.
-
-On an R15 rig the character still spawns black, burning and winged, but
-`PoseService` prints a warning and skips posing rather than moving half a body.
+The NPC is built part by part in `NpcRig` as a proper R6 rig, so it is always
+R6 no matter what Game Settings say. Your own avatar can be R6 or R15; nothing
+touches it.
 
 ## About the animation
 
@@ -48,19 +57,18 @@ There is no uploaded animation pack. Roblox animations are assets: you build
 them in the Animation Editor, publish them to your account, and play the
 resulting IDs. Nothing in a repo can produce those IDs.
 
-Instead `PoseService` writes the `Motor6D` joints directly every frame, which
-needs no uploads and can be tuned by editing numbers in `Config.Pose`:
+Instead `PoseService` writes the NPC's `Motor6D` joints directly every frame,
+which needs no uploads and can be tuned by editing numbers in `Config.Pose`:
 
 - **Idle** - floating upright, arms and legs drifting
-- **Flight** - airborne: pitches forward, legs trail
-- **Slash** - sword swing, overrides the right arm for `Config.Sword.SwingDuration`
+- **Chase** - walking at you: leans forward, legs trail
+- **Swing** - melee or special windup, overrides the sword arm
 
-The stock `Animate` script is disabled on spawn so it cannot fight these poses.
-If you record real animations later, keep `AvatarService` and replace
-`PoseService` with `Animator:LoadAnimation` calls.
+Players are untouched and keep their normal Roblox animations. If you record
+real animations later, keep `NpcService` and replace `PoseService` with
+`Animator:LoadAnimation` calls.
 
-The character does not truly fly - it hovers and takes a flight pose while
-airborne. Jump height and gravity are untouched.
+The NPC does not fly - it hovers above the ground and walks.
 
 ## Tuning
 
@@ -72,20 +80,25 @@ Everything visual lives in `src/shared/Config.luau`; edit and it syncs live:
 | `Wings.FlapSpeed` / `FlapAmount` | flap rate and swing |
 | `Fire.TorsoRate` / `LimbRate` | flame density |
 | `Pose.HoverHeight` / `BobAmount` | float height and bob |
-| `Sword.BladeLength` | sword size |
+| `Npc.MaxHealth` / `Damage` / `AttackCooldown` | how hard the noob hits |
+| `Special.Interval` / `Damage` / `Speed` | the flame attack |
+| `Sword.Damage` / `Cooldown` | your sword |
 
 ## Layout
 
 ```
 src/
   shared/
-    Config.luau        every tunable value: colors, fire, wings, sword, poses
+    Config.luau        every tunable value: health, damage, fire, wings, poses
   server/
     init.server.luau   starts services in order
-    AvatarService      how the character looks: black body, fire, wings, sword
-    PoseService        the animation pack: hover, idle, flight, slash
+    NpcRig             builds a classic R6 character part by part
+    NpcService         spawns the noob, runs its AI and its attacks
+    PoseService        the animation set: hover, idle, chase, swing
+    SwordService       hands out the classic sword and resolves its hits
   client/
-    init.client.luau   empty; no client logic needed yet
+    init.client.luau   starts controllers
+    HealthController   your health bar
 ```
 
 ## Commands

@@ -1,15 +1,16 @@
 --[[
 	Server bootstrap
-	Starts services in a fixed order. AvatarService builds the character;
-	PoseService poses it, so it must come second.
+	Starts services in a fixed order. NpcService spawns the NPC; PoseService
+	poses it, so it must come after.
 
 	To add a service: drop a ModuleScript with a :Start() method into
 	src/server/ and add its name to the list below.
 ]]
 
 local SERVICES = {
-	"AvatarService",
+	"NpcService",
 	"PoseService",
+	"SwordService",
 }
 
 for _, name in SERVICES do

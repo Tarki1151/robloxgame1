@@ -16,6 +16,7 @@ sourcemap.json
 
 # selene generate-roblox-std ciktisi
 roblox.toml
+roblox.yml
 
 # Editor / OS
 .DS_Store

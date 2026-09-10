@@ -46,7 +46,11 @@ local function onRebirthRequest(player: Player)
 	local updated = DataService:Get(player)
 	notifyRemote:FireClient(
 		player,
-		string.format("Rebirth %d! Kazanc carpani x%.1f", updated.Rebirths, EconomyService:GetMultiplier(updated)),
+		string.format(
+			"Rebirth %d! Kazanc carpani x%.1f",
+			updated.Rebirths,
+			EconomyService:GetMultiplier(updated)
+		),
 		"success"
 	)
 end

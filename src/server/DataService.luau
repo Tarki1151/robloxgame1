@@ -86,7 +86,14 @@ local function acquire(userId: number)
 		end
 
 		if not success then
-			warn(string.format("[DataService] %d icin yukleme hatasi (deneme %d): %s", userId, attempt, tostring(result)))
+			warn(
+				string.format(
+					"[DataService] %d icin yukleme hatasi (deneme %d): %s",
+					userId,
+					attempt,
+					tostring(result)
+				)
+			)
 		end
 
 		task.wait(Config.Data.RetryDelay * attempt)
@@ -160,7 +167,12 @@ local function onPlayerAdded(player: Player)
 	end
 
 	if not profile then
-		warn(string.format("[DataService] %s icin veri kilidi alinamadi, gecici profil kullaniliyor.", player.Name))
+		warn(
+			string.format(
+				"[DataService] %s icin veri kilidi alinamadi, gecici profil kullaniliyor.",
+				player.Name
+			)
+		)
 		profile = reconcile(nil)
 		mocked[player] = true
 	end

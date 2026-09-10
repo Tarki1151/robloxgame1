@@ -57,7 +57,13 @@ local function label(parent: BasePart, text: string, color: Color3)
 	gui.Parent = parent
 end
 
-local function createPart(name: string, size: Vector3, position: Vector3, color: Color3, parent: Instance): BasePart
+local function createPart(
+	name: string,
+	size: Vector3,
+	position: Vector3,
+	color: Color3,
+	parent: Instance
+): BasePart
 	local part = Instance.new("Part")
 	part.Name = name
 	part.Size = size

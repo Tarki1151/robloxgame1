@@ -209,13 +209,19 @@ function ShopController:Start()
 
 	local toolsHolder = section("ARACLAR", 1, scroll)
 	for index, entry in Config.Tools do
-		rows.Tools[index] = makeRow(index, entry, "Guc: " .. Format.abbreviate(entry.Power), "BuyTool", toolsHolder)
+		rows.Tools[index] =
+			makeRow(index, entry, "Guc: " .. Format.abbreviate(entry.Power), "BuyTool", toolsHolder)
 	end
 
 	local backpacksHolder = section("CANTALAR", 3, scroll)
 	for index, entry in Config.Backpacks do
-		rows.Backpacks[index] =
-			makeRow(index, entry, "Kapasite: " .. Format.abbreviate(entry.Capacity), "BuyBackpack", backpacksHolder)
+		rows.Backpacks[index] = makeRow(
+			index,
+			entry,
+			"Kapasite: " .. Format.abbreviate(entry.Capacity),
+			"BuyBackpack",
+			backpacksHolder
+		)
 	end
 
 	closeButton.Activated:Connect(function()

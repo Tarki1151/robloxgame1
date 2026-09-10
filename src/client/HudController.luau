@@ -124,7 +124,8 @@ local function render()
 	local state = StateController:Get()
 
 	labels.Coins.Text = Format.money(state.Coins)
-	labels.Backpack.Text = string.format("%s / %s", Format.abbreviate(state.Backpack), Format.abbreviate(state.Capacity))
+	labels.Backpack.Text =
+		string.format("%s / %s", Format.abbreviate(state.Backpack), Format.abbreviate(state.Capacity))
 	labels.Multiplier.Text = string.format("x%.1f", state.Multiplier)
 	labels.Rebirths.Text = tostring(state.Rebirths)
 

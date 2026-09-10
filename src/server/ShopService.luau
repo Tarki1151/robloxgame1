@@ -18,7 +18,13 @@ local ShopService = {}
 local notifyRemote = Remotes.event("Notify")
 
 -- Ortak satin alma akisi: hem araclar hem cantalar ayni kurallara uyar.
-local function purchase(player: Player, requestedIndex: any, list: { any }, currentField: string, noun: string)
+local function purchase(
+	player: Player,
+	requestedIndex: any,
+	list: { any },
+	currentField: string,
+	noun: string
+)
 	if typeof(requestedIndex) ~= "number" then
 		return
 	end

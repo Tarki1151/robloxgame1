@@ -65,6 +65,7 @@ local function build(): BasePart
 	floor.Name = "ArenaFloor"
 	floor.Size = Vector3.new(Config.Arena.Size, 4, Config.Arena.Size)
 	floor.Position = Vector3.new(0, -2, 0)
+	floor.CanCollide = true
 	floor.Anchored = true
 	floor.TopSurface = Enum.SurfaceType.Smooth
 	floor.BottomSurface = Enum.SurfaceType.Smooth
@@ -74,7 +75,30 @@ local function build(): BasePart
 	return floor
 end
 
+--[[
+	Terrain is not a part and cannot be recoloured by darkening anything.
+
+	If the place is built on terrain (a grass or rock ground rather than a
+	baseplate), the only ways to change how it looks are to repaint its
+	material colours or to remove it. This clears a block of it over the arena
+	and lays our own floor in the hole, which is predictable and reversible -
+	the rest of the terrain is untouched.
+]]
+local function clearTerrain(): boolean
+	local terrain = workspace.Terrain
+	if terrain:CountCells() == 0 then
+		return false
+	end
+
+	local half = Config.Arena.Size / 2
+	local region = Region3.new(Vector3.new(-half, -64, -half), Vector3.new(half, 64, half)):ExpandToGrid(4)
+
+	terrain:FillRegion(region, 4, Enum.Material.Air)
+	return true
+end
+
 function ArenaService:Start()
+	local hadTerrain = clearTerrain()
 	local ground = findGround()
 
 	if #ground > 0 then
@@ -98,7 +122,13 @@ function ArenaService:Start()
 		spawnLocation.Parent = workspace
 	end
 
-	print(string.format("[Arena] ground ready (%d existing parts darkened).", #ground))
+	print(
+		string.format(
+			"[Arena] ground ready: %d parts darkened, terrain %s.",
+			#ground,
+			if hadTerrain then "cleared" else "none"
+		)
+	)
 end
 
 return ArenaService

@@ -219,6 +219,10 @@ local function onCharacterAdded(player: Player, character: Model)
 		return
 	end
 
+	-- Diagnostic: nothing here changes a player's appearance, so if an avatar
+	-- looks wrong this line says whether the place is forcing R6.
+	print(string.format("[Player] %s spawned as %s.", player.Name, humanoid.RigType.Name))
+
 	humanoid.MaxHealth = Config.Player.MaxHealth
 	humanoid.Health = Config.Player.MaxHealth
 	humanoid.WalkSpeed = Config.Player.WalkSpeed

@@ -13,9 +13,12 @@ local FOLDER_NAME = "Remotes"
 local EVENTS = {
 	-- Client -> Server
 	"SelectBeast",
+	"CraftWeapon",
+	"EquipWeapon",
 	-- Server -> Client
 	"BeastChanged",
 	"Hit",
+	"WalletChanged",
 }
 
 local folder: Folder

@@ -1,6 +1,6 @@
 --[[
 	SwordService
-	Gives every player a classic linked sword on spawn and resolves its hits.
+	Gives every player their equipped weapon and resolves its hits.
 
 	Damage is server-side. The client only triggers Tool.Activated; the server
 	decides whether anything was actually hit, so a modified client cannot
@@ -20,86 +20,10 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 
+local CraftService = require(script.Parent.CraftService)
+local WeaponFactory = require(script.Parent.WeaponFactory)
+
 local SwordService = {}
-
-local function makeSword(): Tool
-	local tool = Instance.new("Tool")
-	tool.Name = Config.Sword.Name
-	tool.CanBeDropped = false
-	tool.Grip = CFrame.new(0, 0, -1.5) * CFrame.Angles(math.pi / 2, 0, math.pi / 2)
-
-	local handle = Instance.new("Part")
-	handle.Name = "Handle"
-	handle.Size = Vector3.new(0.8, 4.4, 0.8)
-	handle.Color = Config.Sword.BladeColor
-	handle.Material = Enum.Material.Metal
-	handle.CanCollide = false
-	handle.Parent = tool
-
-	-- The classic sword is one long handle plus a crossguard.
-	local guard = Instance.new("Part")
-	guard.Name = "Guard"
-	guard.Size = Vector3.new(2, 0.35, 0.35)
-	guard.Color = Config.Sword.GripColor
-	guard.Material = Enum.Material.Metal
-	guard.CanCollide = false
-	guard.CanQuery = false
-	guard.Massless = true
-	guard.Parent = tool
-
-	local weld = Instance.new("Weld")
-	weld.Part0 = handle
-	weld.Part1 = guard
-	weld.C0 = CFrame.new(0, -1.7, 0)
-	weld.Parent = handle
-
-	-- A Trail needs two attachments to stretch between: tip and base of the
-	-- blade. It is left disabled until a swing starts, so the sword does not
-	-- smear while you walk around.
-	local tip = Instance.new("Attachment")
-	tip.Name = "TrailTip"
-	tip.Position = Vector3.new(0, 2.2, 0)
-	tip.Parent = handle
-
-	local base = Instance.new("Attachment")
-	base.Name = "TrailBase"
-	base.Position = Vector3.new(0, -1.2, 0)
-	base.Parent = handle
-
-	local trail = Instance.new("Trail")
-	trail.Name = "SlashTrail"
-	trail.Attachment0 = tip
-	trail.Attachment1 = base
-	trail.Lifetime = Config.Vfx.TrailLifetime
-	trail.MinLength = 0.1
-	trail.WidthScale = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1),
-		NumberSequenceKeypoint.new(1, 0),
-	})
-	trail.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.15),
-		NumberSequenceKeypoint.new(1, 1),
-	})
-	trail.Color = ColorSequence.new(Config.Vfx.TrailColor)
-	trail.LightEmission = 0.8
-	trail.FaceCamera = true
-	trail.Enabled = false
-	trail.Parent = handle
-
-	local slashSound = Instance.new("Sound")
-	slashSound.Name = "Slash"
-	slashSound.SoundId = Config.Vfx.SlashSound
-	slashSound.Volume = 0.7
-	slashSound.Parent = handle
-
-	local hitSound = Instance.new("Sound")
-	hitSound.Name = "Hit"
-	hitSound.SoundId = Config.Vfx.HitSound
-	hitSound.Volume = 0.8
-	hitSound.Parent = handle
-
-	return tool
-end
 
 -- Sparks and a flash where a blow lands.
 local function impact(position: Vector3, color: Color3)
@@ -175,7 +99,22 @@ local function slashArc(handle: BasePart)
 	end)
 end
 
-local function equip(player: Player)
+-- Removes whatever weapon the player is holding, so equipping a new one
+-- never leaves the old one in the backpack.
+local function clearWeapons(player: Player)
+	local containers = { player:FindFirstChildOfClass("Backpack"), player.Character }
+	for _, container in containers do
+		if container then
+			for _, child in container:GetChildren() do
+				if child:IsA("Tool") and child:GetAttribute("Damage") then
+					child:Destroy()
+				end
+			end
+		end
+	end
+end
+
+local function equip(player: Player, weaponIndex: number?)
 	local backpack = player:FindFirstChildOfClass("Backpack")
 	local character = player.Character
 	local humanoid = if character then character:FindFirstChildOfClass("Humanoid") else nil
@@ -183,7 +122,15 @@ local function equip(player: Player)
 		return
 	end
 
-	local tool = makeSword()
+	local index = weaponIndex or CraftService:GetEquipped(player)
+	local weapon = Config.Weapons[index]
+	if not weapon then
+		return
+	end
+
+	clearWeapons(player)
+
+	local tool = WeaponFactory.build(weapon)
 	local handle = tool:FindFirstChild("Handle") :: BasePart
 
 	local lastSwing = 0
@@ -212,7 +159,9 @@ local function equip(player: Player)
 		end
 		struck[victim] = now
 
-		victim:TakeDamage(Config.Sword.Damage)
+		-- Damage rides on the tool, set when it was built.
+		local damage = tool:GetAttribute("Damage") or 0
+		victim:TakeDamage(damage)
 
 		impact(hit.Position, Config.Vfx.SparkColor)
 
@@ -291,6 +240,12 @@ function SwordService:Start()
 	Players.PlayerAdded:Connect(onPlayerAdded)
 	for _, player in Players:GetPlayers() do
 		onPlayerAdded(player)
+	end
+
+	-- CraftService calls back rather than requiring this service, which would
+	-- be a require cycle.
+	CraftService.OnEquip = function(player: Player, index: number)
+		equip(player, index)
 	end
 end
 

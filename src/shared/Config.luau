@@ -14,18 +14,67 @@ Config.Player = {
 	WalkSpeed = 16,
 }
 
--- The classic linked-sword handed to every player on spawn.
+-- Behaviour shared by every weapon. Per-weapon numbers live in Config.Weapons.
 Config.Sword = {
-	Name = "Classic Sword",
-	Damage = 20,
 	-- Seconds between swings.
 	Cooldown = 0.6,
 	-- How long the blade deals damage after a swing starts.
 	HitWindow = 0.35,
-	-- Same target cannot be hit twice inside this window.
+	-- The same target cannot be hit twice inside this window.
 	HitDebounce = 0.5,
-	BladeColor = Color3.fromRGB(163, 162, 165),
-	GripColor = Color3.fromRGB(70, 70, 75),
+}
+
+--[[
+	The weapon roster.
+
+	Add a row and it appears in the CRAFT menu on its own - nothing else needs
+	touching. Cost is paid in embers, earned by killing beasts.
+
+	  Name    shown in the shop and on the tool
+	  Damage  per hit
+	  Cost    embers to craft; 0 means you start with it
+	  Reach   blade length in studs
+	  Colors  blade and grip
+
+	Set Glow = true for a neon blade.
+]]
+local function weapon(
+	name: string,
+	damage: number,
+	cost: number,
+	reach: number,
+	blade: Color3,
+	grip: Color3,
+	glow: boolean?
+)
+	return {
+		Name = name,
+		Damage = damage,
+		Cost = cost,
+		Reach = reach,
+		BladeColor = blade,
+		GripColor = grip,
+		Glow = glow or false,
+	}
+end
+
+Config.Weapons = {
+	weapon("Classic Sword", 20, 0, 4.4, Color3.fromRGB(163, 162, 165), Color3.fromRGB(70, 70, 75)),
+	weapon("Iron Cleaver", 34, 60, 5, Color3.fromRGB(140, 142, 150), Color3.fromRGB(58, 44, 36)),
+	weapon("Ember Blade", 55, 220, 5.4, Color3.fromRGB(255, 128, 48), Color3.fromRGB(48, 30, 24), true),
+	weapon("Frostbrand", 88, 700, 5.6, Color3.fromRGB(120, 214, 255), Color3.fromRGB(34, 48, 60), true),
+	weapon("Voidedge", 140, 2200, 6, Color3.fromRGB(168, 96, 255), Color3.fromRGB(24, 18, 34), true),
+	-- Add your own here: weapon("Name", damage, cost, reach, bladeColor, gripColor, glow)
+}
+
+Config.Craft = {
+	CurrencyName = "Embers",
+	-- Embers earned per beast killed. Scaled by the beast's own health, so
+	-- later beasts are worth grinding.
+	RewardPerKill = 25,
+	RewardHealthScale = 0.05,
+	-- Everyone starts owning weapon 1.
+	StarterWeapon = 1,
 }
 
 -- Shared behaviour for every beast. Per-beast numbers live in Config.Beasts.
@@ -470,6 +519,9 @@ Config.Ui = {
 	NpcBarSize = UDim2.fromScale(1, 0.32),
 	NpcBarHeight = 4.5,
 	NpcBarDistance = 220,
+	-- Shop tile colour for a weapon you cannot afford yet.
+	Locked = Color3.fromRGB(92, 88, 96),
+	Owned = Color3.fromRGB(120, 200, 130),
 	-- FIGHT BEAST button and its menu.
 	Accent = Color3.fromRGB(255, 108, 32),
 	AccentDeep = Color3.fromRGB(168, 38, 12),

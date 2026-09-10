@@ -9,9 +9,12 @@ Ashburn at 200 HP up to Ashsovereign at 15,000.
 Each beast is a pitch black classic noob, burning, with six feathered angel
 wings and a flaming sword.
 
+Killing a beast earns **embers**. Spend them in the **FORGE** to craft better
+weapons.
+
 | | Health | Attack |
 | --- | --- | --- |
-| You | 100 | Sword, 20 damage, every 0.6s |
+| You | 100 | Your equipped weapon, every 0.6s |
 | Ashburn (1) | 200 | Melee 10 every 5s, flame 15 every 15s |
 | Ashsovereign (20) | 15,000 | Melee 224 every 2s, flame 354 every 5s |
 
@@ -57,6 +60,25 @@ colours. Change a row and that beast changes.
 Adding a twenty-first is one more `beast(...)` line; the menu builds itself
 from the list.
 
+## Weapons
+
+`Config.Weapons` is a list of rows, same idea as the beasts:
+
+```lua
+weapon("Ember Blade", 55, 220, 5.4, Color3.fromRGB(255, 128, 48), Color3.fromRGB(48, 30, 24), true)
+--      name          dmg cost reach blade colour              grip colour            glow
+```
+
+Add a row and it appears in the forge on its own. Cost `0` means you own it
+from the start. `glow` makes the blade neon and gives it a matching trail and
+light.
+
+Embers come from kills: `Config.Craft.RewardPerKill` plus the beast's health
+times `RewardHealthScale`, so later beasts pay better.
+
+Progress is **in memory only** - there is no DataStore in this place, so
+embers and crafted weapons last for the session and reset when you rejoin.
+
 ## Rig type does not matter
 
 The NPC is built part by part in `NpcRig` as a proper R6 rig, so it is always
@@ -94,7 +116,8 @@ Everything visual lives in `src/shared/Config.luau`; edit and it syncs live:
 | `Pose.HoverHeight` / `BobAmount` | float height and bob |
 | `Npc.MaxHealth` / `Damage` / `AttackCooldown` | how hard the noob hits |
 | `Special.Interval` / `Damage` / `Speed` | the flame attack |
-| `Sword.Damage` / `Cooldown` | your sword |
+| `Sword.Cooldown` / `HitWindow` | swing rate and how long a swing can hit |
+| `Craft.RewardPerKill` | embers per beast |
 | `Vfx.*` | trails, sparks, sounds, knockback, camera shake |
 | `Wings.FeathersPerRow` / `Rows` | feather count - the first thing to cut if it slows down |
 
@@ -109,12 +132,15 @@ src/
     NpcRig             builds a classic R6 character part by part, at any size
     AngelWings         feathered wings: rows of tapered feathers on two bones
     NpcService         spawns the beast, runs its AI and its attacks
+    CraftService       embers, weapon ownership, crafting rules
+    WeaponFactory      builds a weapon Tool from a Config.Weapons row
     PoseService        the animation set: hover, idle, chase, swing
     SwordService       hands out the classic sword and resolves its hits
   client/
     init.client.luau   starts controllers
     HealthController   your health bar
     BeastMenuController the FIGHT BEAST button and the roster grid
+    ShopController     the CRAFT button, the forge panel, the ember counter
     ImpactController   camera shake and damage flash
 ```
 

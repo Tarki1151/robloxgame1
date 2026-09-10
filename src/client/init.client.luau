@@ -7,6 +7,7 @@
 local CONTROLLERS = {
 	"HealthController",
 	"BeastMenuController",
+	"ShopController",
 	"ImpactController",
 }
 

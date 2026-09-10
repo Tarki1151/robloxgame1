@@ -20,6 +20,7 @@ local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 
 local AngelWings = require(script.Parent.AngelWings)
+local CraftService = require(script.Parent.CraftService)
 local NpcRig = require(script.Parent.NpcRig)
 
 local NpcService = {}
@@ -212,6 +213,14 @@ local function spawnNpc(index: number): Npc
 
 	humanoid.Died:Connect(function()
 		active[character] = nil
+
+		-- Pay out embers. Awarded to everyone present rather than to whoever
+		-- landed the last hit: there is no damage tracking yet, and in a solo
+		-- fight the two are the same thing.
+		local reward = Config.Craft.RewardPerKill + beast.MaxHealth * Config.Craft.RewardHealthScale
+		for _, player in Players:GetPlayers() do
+			CraftService:Award(player, reward)
+		end
 		-- Only bring this beast back if the player has not since picked
 		-- another one from the menu.
 		local diedAs = index

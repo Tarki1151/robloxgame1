@@ -38,34 +38,44 @@ local function joint(name: string, part0: BasePart, part1: BasePart, c0: CFrame,
 	return motor
 end
 
-function NpcRig.build(name: string, color: Color3, material: Enum.Material): Model
+function NpcRig.build(name: string, color: Color3, material: Enum.Material, scale: number): Model
 	local character = Instance.new("Model")
 	character.Name = name
 
-	local torso = makePart("Torso", Vector3.new(2, 2, 1), color, material)
+	-- Every part and every joint offset is multiplied by scale, so a bigger
+	-- beast is the same rig at a larger size rather than a stretched one.
+	local function size(x: number, y: number, z: number): Vector3
+		return Vector3.new(x, y, z) * scale
+	end
+
+	local function at(x: number, y: number, z: number): CFrame
+		return CFrame.new(x * scale, y * scale, z * scale)
+	end
+
+	local torso = makePart("Torso", size(2, 2, 1), color, material)
 	torso.Parent = character
 
-	local head = makePart("Head", Vector3.new(2, 1, 1), color, material)
+	local head = makePart("Head", size(2, 1, 1), color, material)
 	head.Parent = character
 
 	-- The classic head is a 1.25x scaled block; without the mesh it reads as
 	-- a flat brick rather than a noob head.
 	local headMesh = Instance.new("SpecialMesh")
 	headMesh.MeshType = Enum.MeshType.Head
-	headMesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+	headMesh.Scale = Vector3.new(1.25, 1.25, 1.25) * scale
 	headMesh.Parent = head
 
-	local rightArm = makePart("Right Arm", Vector3.new(1, 2, 1), color, material)
+	local rightArm = makePart("Right Arm", size(1, 2, 1), color, material)
 	rightArm.Parent = character
-	local leftArm = makePart("Left Arm", Vector3.new(1, 2, 1), color, material)
+	local leftArm = makePart("Left Arm", size(1, 2, 1), color, material)
 	leftArm.Parent = character
-	local rightLeg = makePart("Right Leg", Vector3.new(1, 2, 1), color, material)
+	local rightLeg = makePart("Right Leg", size(1, 2, 1), color, material)
 	rightLeg.Parent = character
-	local leftLeg = makePart("Left Leg", Vector3.new(1, 2, 1), color, material)
+	local leftLeg = makePart("Left Leg", size(1, 2, 1), color, material)
 	leftLeg.Parent = character
 
 	-- Invisible collision box the Humanoid actually walks around with.
-	local root = makePart("HumanoidRootPart", Vector3.new(2, 2, 1), color, material)
+	local root = makePart("HumanoidRootPart", size(2, 2, 1), color, material)
 	root.Transparency = 1
 	root.CanCollide = false
 	root.Parent = character
@@ -80,43 +90,43 @@ function NpcRig.build(name: string, color: Color3, material: Enum.Material): Mod
 		"RootJoint",
 		root,
 		torso,
-		CFrame.new(0, 0, 0) * CFrame.Angles(-HALF_PI, 0, math.pi),
-		CFrame.new(0, 0, 0) * CFrame.Angles(-HALF_PI, 0, math.pi)
+		at(0, 0, 0) * CFrame.Angles(-HALF_PI, 0, math.pi),
+		at(0, 0, 0) * CFrame.Angles(-HALF_PI, 0, math.pi)
 	)
 	joint(
 		"Neck",
 		torso,
 		head,
-		CFrame.new(0, 1, 0) * CFrame.Angles(-HALF_PI, 0, math.pi),
-		CFrame.new(0, -0.5, 0) * CFrame.Angles(-HALF_PI, 0, math.pi)
+		at(0, 1, 0) * CFrame.Angles(-HALF_PI, 0, math.pi),
+		at(0, -0.5, 0) * CFrame.Angles(-HALF_PI, 0, math.pi)
 	)
 	joint(
 		"Right Shoulder",
 		torso,
 		rightArm,
-		CFrame.new(1, 0.5, 0) * CFrame.Angles(0, HALF_PI, 0),
-		CFrame.new(-0.5, 0.5, 0) * CFrame.Angles(0, HALF_PI, 0)
+		at(1, 0.5, 0) * CFrame.Angles(0, HALF_PI, 0),
+		at(-0.5, 0.5, 0) * CFrame.Angles(0, HALF_PI, 0)
 	)
 	joint(
 		"Left Shoulder",
 		torso,
 		leftArm,
-		CFrame.new(-1, 0.5, 0) * CFrame.Angles(0, -HALF_PI, 0),
-		CFrame.new(0.5, 0.5, 0) * CFrame.Angles(0, -HALF_PI, 0)
+		at(-1, 0.5, 0) * CFrame.Angles(0, -HALF_PI, 0),
+		at(0.5, 0.5, 0) * CFrame.Angles(0, -HALF_PI, 0)
 	)
 	joint(
 		"Right Hip",
 		torso,
 		rightLeg,
-		CFrame.new(1, -1, 0) * CFrame.Angles(0, HALF_PI, 0),
-		CFrame.new(0.5, 1, 0) * CFrame.Angles(0, HALF_PI, 0)
+		at(1, -1, 0) * CFrame.Angles(0, HALF_PI, 0),
+		at(0.5, 1, 0) * CFrame.Angles(0, HALF_PI, 0)
 	)
 	joint(
 		"Left Hip",
 		torso,
 		leftLeg,
-		CFrame.new(-1, -1, 0) * CFrame.Angles(0, -HALF_PI, 0),
-		CFrame.new(-0.5, 1, 0) * CFrame.Angles(0, -HALF_PI, 0)
+		at(-1, -1, 0) * CFrame.Angles(0, -HALF_PI, 0),
+		at(-0.5, 1, 0) * CFrame.Angles(0, -HALF_PI, 0)
 	)
 
 	return character

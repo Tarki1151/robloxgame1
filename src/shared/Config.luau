@@ -28,39 +28,329 @@ Config.Sword = {
 	GripColor = Color3.fromRGB(70, 70, 75),
 }
 
--- The burning noob, now an NPC rather than the player.
+-- Shared behaviour for every beast. Per-beast numbers live in Config.Beasts.
 Config.Npc = {
-	Name = "Burning Noob",
-	MaxHealth = 200,
-	WalkSpeed = 14,
-	-- Melee: damage per hit and seconds between hits.
-	Damage = 10,
-	AttackCooldown = 5,
-	-- How close it must be to land a hit, and how far it will notice a player.
-	AttackRange = 7,
-	AggroRange = 90,
-	-- Seconds before a new one spawns after it dies.
-	RespawnDelay = 6,
-	-- Where it spawns, relative to the world origin.
+	-- Where a beast spawns, relative to the world origin.
 	SpawnPosition = Vector3.new(0, 6, -28),
-	BodyColor = Color3.fromRGB(10, 10, 12),
+	-- How close it must be to land a melee hit, and how far it notices you.
+	AttackRange = 7,
+	AggroRange = 120,
+	-- Seconds before the same beast returns after being killed.
+	RespawnDelay = 6,
 	Material = Enum.Material.SmoothPlastic,
 }
 
--- The special: every Interval seconds the NPC launches a flame at its target.
--- Independent of the melee cooldown, so it can throw while walking.
+-- The special: a launched flame. Damage and interval come from the beast.
 Config.Special = {
-	Interval = 15,
-	Damage = 15,
 	-- Studs per second, and how close it must get to count as a hit.
 	Speed = 60,
 	HitRadius = 4,
 	-- Give up after this long so a stray flame never lives forever.
 	Lifetime = 6,
 	Size = 2.4,
-	Color = Color3.fromRGB(255, 120, 30),
 	-- Windup before the flame leaves its hand, so the swing reads first.
 	Windup = 0.4,
+}
+
+--[[
+	The roster. Twenty beasts, picked from the FIGHT BEAST menu.
+
+	Beast 1 is Ashburn, hand-tuned. The rest scale up from it: more health,
+	more damage, faster attacks, and their own palette. They share one body
+	and one behaviour, so adding a beast is one row here rather than a new
+	model - change a row and that beast changes.
+]]
+local function beast(
+	name: string,
+	health: number,
+	damage: number,
+	special: number,
+	interval: number,
+	cooldown: number,
+	speed: number,
+	scale: number,
+	body: Color3,
+	flame: Color3,
+	wing: Color3
+)
+	return {
+		Name = name,
+		MaxHealth = health,
+		Damage = damage,
+		SpecialDamage = special,
+		SpecialInterval = interval,
+		AttackCooldown = cooldown,
+		WalkSpeed = speed,
+		-- Body parts are multiplied by this. Above ~1.6 the rig starts
+		-- clipping the ground, so the hover height compensates.
+		Scale = scale,
+		BodyColor = body,
+		FlameColor = flame,
+		WingColor = wing,
+	}
+end
+
+Config.Beasts = {
+	beast(
+		"Ashburn",
+		200,
+		10,
+		15,
+		15,
+		5,
+		14,
+		1,
+		Color3.fromRGB(10, 10, 12),
+		Color3.fromRGB(255, 138, 40),
+		Color3.fromRGB(255, 178, 96)
+	),
+	beast(
+		"Cinderfang",
+		320,
+		13,
+		19,
+		14,
+		4.6,
+		15,
+		1.05,
+		Color3.fromRGB(24, 12, 12),
+		Color3.fromRGB(255, 110, 48),
+		Color3.fromRGB(255, 160, 90)
+	),
+	beast(
+		"Emberclaw",
+		460,
+		16,
+		24,
+		13,
+		4.4,
+		15,
+		1.1,
+		Color3.fromRGB(32, 14, 10),
+		Color3.fromRGB(255, 92, 36),
+		Color3.fromRGB(255, 150, 80)
+	),
+	beast(
+		"Sootwing",
+		620,
+		19,
+		29,
+		13,
+		4.2,
+		16,
+		1.15,
+		Color3.fromRGB(18, 18, 22),
+		Color3.fromRGB(220, 120, 70),
+		Color3.fromRGB(230, 170, 120)
+	),
+	beast(
+		"Pyrelord",
+		820,
+		23,
+		35,
+		12,
+		4,
+		16,
+		1.2,
+		Color3.fromRGB(38, 10, 8),
+		Color3.fromRGB(255, 70, 24),
+		Color3.fromRGB(255, 130, 60)
+	),
+	beast(
+		"Scorchmaw",
+		1050,
+		27,
+		42,
+		12,
+		3.8,
+		17,
+		1.25,
+		Color3.fromRGB(28, 8, 18),
+		Color3.fromRGB(255, 60, 90),
+		Color3.fromRGB(255, 120, 150)
+	),
+	beast(
+		"Blazehorn",
+		1320,
+		32,
+		50,
+		11,
+		3.6,
+		17,
+		1.3,
+		Color3.fromRGB(20, 6, 28),
+		Color3.fromRGB(240, 60, 160),
+		Color3.fromRGB(255, 130, 200)
+	),
+	beast(
+		"Infernus",
+		1650,
+		38,
+		59,
+		11,
+		3.4,
+		18,
+		1.35,
+		Color3.fromRGB(30, 6, 6),
+		Color3.fromRGB(255, 40, 20),
+		Color3.fromRGB(255, 110, 70)
+	),
+	beast(
+		"Charbringer",
+		2050,
+		45,
+		70,
+		10,
+		3.2,
+		18,
+		1.4,
+		Color3.fromRGB(14, 14, 16),
+		Color3.fromRGB(200, 90, 255),
+		Color3.fromRGB(220, 150, 255)
+	),
+	beast(
+		"Moltenshade",
+		2500,
+		53,
+		82,
+		10,
+		3,
+		19,
+		1.45,
+		Color3.fromRGB(10, 20, 26),
+		Color3.fromRGB(90, 200, 255),
+		Color3.fromRGB(150, 220, 255)
+	),
+	beast(
+		"Hellplume",
+		3050,
+		62,
+		96,
+		9,
+		2.9,
+		19,
+		1.5,
+		Color3.fromRGB(26, 6, 10),
+		Color3.fromRGB(255, 80, 40),
+		Color3.fromRGB(255, 140, 90)
+	),
+	beast(
+		"Ruinwing",
+		3700,
+		72,
+		112,
+		9,
+		2.8,
+		20,
+		1.55,
+		Color3.fromRGB(8, 8, 10),
+		Color3.fromRGB(150, 60, 255),
+		Color3.fromRGB(190, 120, 255)
+	),
+	beast(
+		"Cataclyst",
+		4450,
+		84,
+		130,
+		8,
+		2.7,
+		20,
+		1.6,
+		Color3.fromRGB(22, 4, 24),
+		Color3.fromRGB(255, 50, 200),
+		Color3.fromRGB(255, 120, 220)
+	),
+	beast(
+		"Voidsear",
+		5300,
+		97,
+		151,
+		8,
+		2.6,
+		21,
+		1.65,
+		Color3.fromRGB(4, 4, 8),
+		Color3.fromRGB(120, 40, 255),
+		Color3.fromRGB(170, 110, 255)
+	),
+	beast(
+		"Doomforge",
+		6300,
+		112,
+		175,
+		7,
+		2.5,
+		21,
+		1.7,
+		Color3.fromRGB(28, 16, 4),
+		Color3.fromRGB(255, 170, 30),
+		Color3.fromRGB(255, 210, 110)
+	),
+	beast(
+		"Starscorch",
+		7450,
+		129,
+		202,
+		7,
+		2.4,
+		22,
+		1.75,
+		Color3.fromRGB(6, 10, 24),
+		Color3.fromRGB(80, 160, 255),
+		Color3.fromRGB(160, 210, 255)
+	),
+	beast(
+		"Wrathmoth",
+		8800,
+		148,
+		233,
+		6,
+		2.3,
+		22,
+		1.8,
+		Color3.fromRGB(20, 20, 6),
+		Color3.fromRGB(230, 255, 60),
+		Color3.fromRGB(245, 255, 150)
+	),
+	beast(
+		"Nightbrand",
+		10400,
+		170,
+		268,
+		6,
+		2.2,
+		23,
+		1.85,
+		Color3.fromRGB(2, 2, 4),
+		Color3.fromRGB(255, 30, 60),
+		Color3.fromRGB(255, 100, 120)
+	),
+	beast(
+		"Endflame",
+		12300,
+		195,
+		308,
+		5,
+		2.1,
+		23,
+		1.9,
+		Color3.fromRGB(16, 0, 0),
+		Color3.fromRGB(255, 20, 10),
+		Color3.fromRGB(255, 90, 50)
+	),
+	beast(
+		"Ashsovereign",
+		15000,
+		224,
+		354,
+		5,
+		2,
+		24,
+		2,
+		Color3.fromRGB(0, 0, 0),
+		Color3.fromRGB(255, 240, 210),
+		Color3.fromRGB(255, 250, 235)
+	),
 }
 
 Config.Fire = {
@@ -75,19 +365,45 @@ Config.Fire = {
 	LightRange = 18,
 }
 
+--[[
+	Angel wings, built from layered feathers rather than one flat plank.
+
+	Each wing is three rows of feathers on two bones (an inner "arm" and an
+	outer "hand"), the way a real bird wing folds. Feathers taper toward the
+	tip and fan out along the bone, so the silhouette reads as a wing from any
+	angle instead of only from the side.
+]]
 Config.Wings = {
-	-- Three pairs, mirrored left and right.
+	-- Three wings per side, six in total.
 	Pairs = 3,
-	Length = 7.5,
-	Width = 2.6,
-	Thickness = 0.22,
-	Spread = 1.5,
-	Sweep = 0.35,
-	FlapSpeed = 2.4,
-	FlapAmount = 0.42,
-	PairDelay = 0.28,
-	Color = Color3.fromRGB(255, 110, 30),
-	Transparency = 0.25,
+	-- Feathers per row, and rows per wing. 3 rows x 9 feathers x 6 wings is
+	-- 162 parts; raising either is the first thing to cut if it ever slows.
+	FeathersPerRow = 9,
+	Rows = 3,
+	-- Longest feather at the base of the wing, shortest at the tip.
+	FeatherLength = 5.4,
+	TipScale = 0.42,
+	FeatherWidth = 0.9,
+	FeatherThickness = 0.12,
+	-- How far the wing sweeps back, and how much each row droops below the
+	-- one in front of it.
+	Sweep = 0.5,
+	RowDrop = 0.32,
+	RowOffset = 0.55,
+	-- Vertical spacing between the three wings on each side.
+	Spread = 1.6,
+	Sweep2 = 0.28,
+	-- Flap cycles per second and swing in radians.
+	FlapSpeed = 1.6,
+	FlapAmount = 0.34,
+	-- Feathers further out lag behind the shoulder, so the flap ripples down
+	-- the wing instead of moving as one rigid board.
+	FeatherLag = 0.16,
+	PairDelay = 0.3,
+	-- Feather colour is the beast's WingColor; this is how much white is
+	-- mixed into the outer feathers.
+	TipLighten = 0.45,
+	Transparency = 0.08,
 }
 
 Config.FlameSword = {
@@ -115,6 +431,33 @@ Config.Pose = {
 	BlendSpeed = 8,
 }
 
+--[[
+	Hit feel. Every one of these is cosmetic - damage is decided on the server
+	regardless of whether any of this plays.
+]]
+Config.Vfx = {
+	-- Classic Roblox sword sounds.
+	SlashSound = "rbxassetid://12222216",
+	HitSound = "rbxassetid://12222225",
+	FlameSound = "rbxassetid://1836147015",
+	-- Blade trail while a swing is live.
+	TrailLifetime = 0.32,
+	TrailWidth = 1.1,
+	TrailColor = Color3.fromRGB(255, 255, 255),
+	-- The arc that sweeps out of the blade on a swing.
+	SlashArcSize = Vector3.new(11, 0.35, 3.4),
+	SlashArcLifetime = 0.18,
+	-- Sparks where a hit lands.
+	SparkCount = 26,
+	SparkSpeed = NumberRange.new(14, 32),
+	SparkColor = Color3.fromRGB(255, 214, 140),
+	-- Camera kick when you take damage: studs of shake and how fast it decays.
+	ShakeMagnitude = 1.6,
+	ShakeDecay = 5.5,
+	-- How far a hit shoves the target.
+	Knockback = 22,
+}
+
 Config.Ui = {
 	-- Player health bar.
 	BarSize = UDim2.new(0, 260, 0, 26),
@@ -123,10 +466,19 @@ Config.Ui = {
 	HealthHigh = Color3.fromRGB(86, 200, 96),
 	HealthLow = Color3.fromRGB(214, 64, 58),
 	Text = Color3.fromRGB(240, 240, 245),
-	-- Overhead bar on the NPC.
+	-- Overhead bar on the beast.
 	NpcBarSize = UDim2.fromScale(1, 0.32),
 	NpcBarHeight = 4.5,
-	NpcBarDistance = 140,
+	NpcBarDistance = 220,
+	-- FIGHT BEAST button and its menu.
+	Accent = Color3.fromRGB(255, 108, 32),
+	AccentDeep = Color3.fromRGB(168, 38, 12),
+	Panel = Color3.fromRGB(16, 15, 18),
+	PanelEdge = Color3.fromRGB(58, 52, 58),
+	Muted = Color3.fromRGB(150, 146, 152),
+	-- Menu grid.
+	Columns = 5,
+	TileHeight = 78,
 }
 
 return Config

@@ -1,21 +1,20 @@
 {
   "name": "robloxgame1",
-  "globIgnorePaths": ["**/.package-lock.json"],
+  "globIgnorePaths": [
+    "**/.package-lock.json"
+  ],
   "tree": {
     "$className": "DataModel",
-
     "ReplicatedStorage": {
       "Shared": {
         "$path": "src/shared"
       }
     },
-
     "ServerScriptService": {
       "Server": {
         "$path": "src/server"
       }
     },
-
     "StarterPlayer": {
       "$className": "StarterPlayer",
       "StarterPlayerScripts": {
@@ -25,21 +24,90 @@
         }
       }
     },
-
     "Workspace": {
       "$className": "Workspace",
       "$properties": {
         "FilteringEnabled": true
       }
     },
-
     "Lighting": {
       "$className": "Lighting",
       "$properties": {
-        "Technology": "ShadowMap"
+        "Technology": "Future",
+        "Ambient": [
+          10,
+          10,
+          14
+        ],
+        "OutdoorAmbient": [
+          28,
+          26,
+          34
+        ],
+        "Brightness": 2,
+        "ClockTime": 18.5,
+        "GeographicLatitude": 12,
+        "ExposureCompensation": 0.25,
+        "EnvironmentDiffuseScale": 0.6,
+        "EnvironmentSpecularScale": 0.7,
+        "GlobalShadows": true,
+        "ShadowSoftness": 0.35,
+        "FogEnd": 900,
+        "FogStart": 120,
+        "FogColor": [
+          26,
+          22,
+          30
+        ]
+      },
+      "Atmosphere": {
+        "$className": "Atmosphere",
+        "$properties": {
+          "Density": 0.38,
+          "Offset": 0.1,
+          "Color": [
+            190,
+            165,
+            160
+          ],
+          "Decay": [
+            96,
+            70,
+            76
+          ],
+          "Glare": 0.35,
+          "Haze": 1.8
+        }
+      },
+      "Bloom": {
+        "$className": "BloomEffect",
+        "$properties": {
+          "Intensity": 0.9,
+          "Size": 28,
+          "Threshold": 1.1
+        }
+      },
+      "SunRays": {
+        "$className": "SunRaysEffect",
+        "$properties": {
+          "Intensity": 0.14,
+          "Spread": 0.9
+        }
+      },
+      "ColorGrade": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Brightness": -0.02,
+          "Contrast": 0.16,
+          "Saturation": 0.08,
+          "TintColor": [
+            255,
+            246,
+            240
+          ]
+        }
       }
     },
-
     "SoundService": {
       "$className": "SoundService",
       "$properties": {

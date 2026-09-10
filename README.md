@@ -1,21 +1,23 @@
 # robloxgame1
 
-Fight a burning noob.
+Fight a beast.
 
-You spawn as your normal Roblox avatar with 100 HP and a classic sword. An
-NPC - a pitch black classic noob, on fire, with six fire wings and a flaming
-sword - hunts you down with 200 HP.
+You spawn as your normal Roblox avatar with 100 HP and a classic sword. Press
+**FIGHT BEAST** and pick one of twenty from the roster - they scale from
+Ashburn at 200 HP up to Ashsovereign at 15,000.
 
-| | Health | Attack | Rate |
-| --- | --- | --- | --- |
-| You | 100 | Sword, 20 damage | every 0.6s |
-| Burning Noob | 200 | Melee, 10 damage | every 5s |
-| | | Flame projectile, 15 damage | every 15s |
+Each beast is a pitch black classic noob, burning, with six feathered angel
+wings and a flaming sword.
 
-The flame is aimed where you stood when it launched, so it can be dodged by
-moving. Kill the noob and a new one spawns after 6 seconds.
+| | Health | Attack |
+| --- | --- | --- |
+| You | 100 | Sword, 20 damage, every 0.6s |
+| Ashburn (1) | 200 | Melee 10 every 5s, flame 15 every 15s |
+| Ashsovereign (20) | 15,000 | Melee 224 every 2s, flame 354 every 5s |
 
-Your health bar sits at the bottom left; the noob's is over its head.
+The flame is aimed where you stood when it launched, so it can be dodged.
+Kill a beast and the same one returns after 6 seconds, unless you have picked
+another from the menu.
 
 ## Setup
 
@@ -44,6 +46,16 @@ Or build a place file without Studio:
 ```bash
 rojo build default.project.json --output game.rbxlx
 ```
+
+## The roster
+
+`Config.Beasts` is twenty rows. Every beast shares one body and one behaviour,
+so a beast is a row of numbers rather than a model: name, health, damage,
+special damage and interval, attack cooldown, walk speed, size, and three
+colours. Change a row and that beast changes.
+
+Adding a twenty-first is one more `beast(...)` line; the menu builds itself
+from the list.
 
 ## Rig type does not matter
 
@@ -83,6 +95,8 @@ Everything visual lives in `src/shared/Config.luau`; edit and it syncs live:
 | `Npc.MaxHealth` / `Damage` / `AttackCooldown` | how hard the noob hits |
 | `Special.Interval` / `Damage` / `Speed` | the flame attack |
 | `Sword.Damage` / `Cooldown` | your sword |
+| `Vfx.*` | trails, sparks, sounds, knockback, camera shake |
+| `Wings.FeathersPerRow` / `Rows` | feather count - the first thing to cut if it slows down |
 
 ## Layout
 
@@ -92,13 +106,16 @@ src/
     Config.luau        every tunable value: health, damage, fire, wings, poses
   server/
     init.server.luau   starts services in order
-    NpcRig             builds a classic R6 character part by part
-    NpcService         spawns the noob, runs its AI and its attacks
+    NpcRig             builds a classic R6 character part by part, at any size
+    AngelWings         feathered wings: rows of tapered feathers on two bones
+    NpcService         spawns the beast, runs its AI and its attacks
     PoseService        the animation set: hover, idle, chase, swing
     SwordService       hands out the classic sword and resolves its hits
   client/
     init.client.luau   starts controllers
     HealthController   your health bar
+    BeastMenuController the FIGHT BEAST button and the roster grid
+    ImpactController   camera shake and damage flash
 ```
 
 ## Commands

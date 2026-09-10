@@ -36,7 +36,6 @@ type Rig = {
 	current: { [string]: CFrame },
 	rootJoint: Motor6D?,
 	rootRest: CFrame,
-	wingRest: { CFrame },
 }
 
 local JOINT_NAMES = {
@@ -70,18 +69,12 @@ local function buildRig(npc): Rig?
 	local rootJoint = npc.root:FindFirstChild("RootJoint")
 	local rootMotor = if rootJoint and rootJoint:IsA("Motor6D") then rootJoint else nil
 
-	local wingRest: { CFrame } = {}
-	for index, weld in npc.wings do
-		wingRest[index] = weld.C0
-	end
-
 	return {
 		joints = joints,
 		rest = rest,
 		current = current,
 		rootJoint = rootMotor,
 		rootRest = if rootMotor then rootMotor.C0 else CFrame.identity,
-		wingRest = wingRest,
 	}
 end
 
@@ -118,19 +111,25 @@ local function targetsFor(npc, now: number): { [string]: CFrame }
 	return targets
 end
 
-local function flapWings(npc, rig: Rig, now: number)
-	for index, weld in npc.wings do
-		local restOffset = rig.wingRest[index]
-		if restOffset then
-			-- Welds alternate left, right, left, right - so the pair number is
-			-- every second entry, and each pair lags the one above it.
-			local pair = math.floor((index - 1) / 2)
-			local side = if index % 2 == 1 then -1 else 1
-			local phase = now * Config.Wings.FlapSpeed * math.pi * 2 - pair * Config.Wings.PairDelay
-			local flap = math.sin(phase) * Config.Wings.FlapAmount
+--[[
+	Flap the feathers.
 
-			weld.C0 = restOffset * CFrame.Angles(0, 0, flap * side)
-		end
+	Each feather rotates around its own rest offset. The phase is pushed back
+	by how far out along the wing the feather sits, so the beat travels from
+	shoulder to tip instead of the whole wing snapping as one piece - that lag
+	is most of what separates a wing from a board.
+]]
+local function flapWings(npc, now: number)
+	for _, feather in npc.wings do
+		local phase = now * Config.Wings.FlapSpeed * math.pi * 2
+			- feather.span * Config.Wings.FeatherLag * math.pi * 2
+			- (feather.wing - 1) * Config.Wings.PairDelay
+
+		-- Feathers at the tip travel further than those at the shoulder.
+		local amount = Config.Wings.FlapAmount * (0.35 + feather.span)
+		local flap = math.sin(phase) * amount
+
+		feather.weld.C0 = feather.rest * CFrame.Angles(0, 0, flap * feather.side)
 	end
 end
 
@@ -169,7 +168,7 @@ local function step(deltaTime: number)
 				end
 			end
 
-			flapWings(npc, rig, now)
+			flapWings(npc, now)
 		elseif not character.Parent then
 			rigs[character] = nil
 		end

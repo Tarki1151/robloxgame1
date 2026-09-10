@@ -2,7 +2,10 @@
 
 An empty Rojo project, ready for a new Roblox game.
 
-The toolchain and CI are set up; only the gameplay code is missing.
+The toolchain and CI are set up. The only gameplay code is `GroundService`,
+which darkens the stock baseplate: it recolours every large flat anchored
+part and strips the light grid texture that otherwise keeps it looking bright.
+Colour and material are in `Config.Ground`.
 
 ## Setup
 

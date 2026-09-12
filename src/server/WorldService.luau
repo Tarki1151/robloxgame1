@@ -13,6 +13,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 
 local Castle = require(script.Parent.Castle)
+local Keep = require(script.Parent.Keep)
 
 local WorldService = {}
 
@@ -170,6 +171,7 @@ function WorldService:Start()
 
 	local origin = Config.Castle.Direction.Unit * Config.Castle.Distance
 	local gate = Castle.build(origin, folder)
+	Keep.build(origin, folder)
 
 	local pathStart = Config.Castle.Direction.Unit * Config.Path.StartOffset
 	layPath(pathStart, gate, folder)

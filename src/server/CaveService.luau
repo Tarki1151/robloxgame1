@@ -14,7 +14,6 @@
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -42,45 +41,103 @@ end
 --[[
 	The mound.
 
-	Boulders scattered around a ring, each a squashed ball at its own angle and
-	size. A single dome would read as a bubble; overlapping lumps of different
-	sizes read as rock.
+	Three layers of boulders rather than one ring: an outer ring of large
+	lumps, an inner ring stacked higher and pulled back, and small rubble
+	scattered round the base. Overlapping lumps of different sizes and angles
+	read as rock; a single dome reads as a bubble, and one even ring reads as
+	a fence.
+
+	The variation is deterministic - driven by sin and cos of the index rather
+	than math.random - so the cave looks the same every run instead of
+	reshuffling itself each time you press Play.
 ]]
 local function buildMound(origin: CFrame, parent: Instance)
 	local radius = Config.Cave.MoundRadius
+	local height = Config.Cave.MoundHeight
 
+	local function boulder(name: string, size: Vector3, cframe: CFrame, color: Color3)
+		local part = rock(name, size, cframe, color, parent)
+		part.Shape = Enum.PartType.Ball
+		return part
+	end
+
+	local function palette(index: number): Color3
+		if index % 3 == 0 then
+			return Config.Cave.RockDarkColor
+		elseif index % 5 == 0 then
+			return Config.Cave.RockLightColor
+		end
+		return Config.Cave.RockColor
+	end
+
+	-- The arc left open for the mouth, in radians either side of the front.
+	local function isMouth(angle: number): boolean
+		return math.abs(angle - math.pi / 2) < 0.42
+	end
+
+	-- Outer ring: the wide base of the hill.
 	for index = 1, Config.Cave.BoulderCount do
 		local angle = (index / Config.Cave.BoulderCount) * math.pi * 2
-		-- Deterministic variation: the same cave every run, but not uniform.
-		local wobble = math.sin(index * 2.4)
-		local distance = radius * (0.62 + wobble * 0.16)
-		local size = Config.Cave.MoundHeight * (0.7 + math.cos(index * 1.7) * 0.25)
+		if not isMouth(angle) then
+			local wobble = math.sin(index * 2.4)
+			local distance = radius * (0.68 + wobble * 0.14)
+			local size = height * (0.52 + math.cos(index * 1.7) * 0.2)
 
-		-- The front of the mound is left open for the mouth.
-		local isFront = math.abs(angle - math.pi / 2) < 0.5
-		if not isFront then
-			local boulder = rock(
+			boulder(
 				"Boulder",
-				Vector3.new(size * 1.5, size, size * 1.4),
+				Vector3.new(size * 1.7, size * 1.15, size * 1.5),
 				origin
-					* CFrame.new(math.cos(angle) * distance, size / 2 - 3, math.sin(angle) * distance)
-					* CFrame.Angles(wobble * 0.3, angle, wobble * 0.2),
-				if index % 3 == 0 then Config.Cave.RockDarkColor else Config.Cave.RockColor,
-				parent
+					* CFrame.new(math.cos(angle) * distance, size * 0.3 - 4, math.sin(angle) * distance)
+					* CFrame.Angles(wobble * 0.35, angle, math.cos(index) * 0.25),
+				palette(index)
 			)
-			boulder.Shape = Enum.PartType.Ball
 		end
 	end
 
-	-- A cap over the top so the mound is closed rather than a ring of rocks.
-	local cap = rock(
+	-- Inner ring: pulled back and stacked higher, so the hill rises rather
+	-- than staying flat-topped.
+	for index = 1, Config.Cave.InnerCount do
+		local angle = (index / Config.Cave.InnerCount) * math.pi * 2
+		if not isMouth(angle) then
+			local wobble = math.cos(index * 3.1)
+			local distance = radius * (0.34 + wobble * 0.1)
+			local size = height * (0.6 + math.sin(index * 2.2) * 0.18)
+
+			boulder(
+				"BoulderInner",
+				Vector3.new(size * 1.5, size * 1.25, size * 1.4),
+				origin
+					* CFrame.new(math.cos(angle) * distance, size * 0.55, math.sin(angle) * distance - 6)
+					* CFrame.Angles(wobble * 0.3, angle * 1.4, wobble * 0.2),
+				palette(index + 1)
+			)
+		end
+	end
+
+	-- Crown, filling the top between the inner lumps.
+	boulder(
 		"MoundCap",
-		Vector3.new(radius * 1.5, Config.Cave.MoundHeight, radius * 1.5),
-		origin * CFrame.new(0, Config.Cave.MoundHeight * 0.45, -4),
-		Config.Cave.RockColor,
-		parent
+		Vector3.new(radius * 1.25, height * 1.05, radius * 1.2),
+		origin * CFrame.new(0, height * 0.42, -12),
+		Config.Cave.RockColor
 	)
-	cap.Shape = Enum.PartType.Ball
+
+	-- Rubble round the base, spilling toward the mouth so the entrance looks
+	-- worn rather than cut.
+	for index = 1, Config.Cave.RubbleCount do
+		local angle = index * 2.399
+		local distance = radius * (0.55 + math.sin(index * 1.3) * 0.45)
+		local size = 3 + math.abs(math.cos(index * 1.9)) * 6
+
+		boulder(
+			"Rubble",
+			Vector3.new(size * 1.4, size, size * 1.2),
+			origin
+				* CFrame.new(math.cos(angle) * distance, size * 0.25 - 1.5, math.sin(angle) * distance)
+				* CFrame.Angles(index * 0.4, angle, index * 0.27),
+			palette(index + 2)
+		)
+	end
 end
 
 -- The mouth: two jambs and a lintel around the opening, plus the tunnel and
@@ -201,79 +258,99 @@ end
 --[[
 	The iron gate.
 
-	Bars are welded to a single frame part, so the whole grid can be moved by
-	tweening that one part rather than animating every bar in step.
+	Every bar is anchored, and the whole grid is a Model moved with PivotTo.
+
+	The first version welded unanchored bars to an anchored frame. That relies
+	on physics holding the weld, and anything that disturbs it - a player
+	walking into the bars, the weld failing to form before the parts settle -
+	leaves the bars lying on the floor and the mouth wide open, which is
+	exactly what happened. Anchored parts cannot be pushed anywhere; the only
+	thing that moves them is this service.
 ]]
-local function buildGate(origin: CFrame, parent: Instance): BasePart
+local function buildGate(origin: CFrame, parent: Instance): Model
 	local width = Config.Cave.MouthWidth
 	local height = Config.Cave.MouthHeight
 
-	local frame = Instance.new("Part")
-	frame.Name = "GateFrame"
-	frame.Size = Vector3.new(width, 1.2, 1.2)
-	frame.CFrame = origin * CFrame.new(0, height - 0.6, 0)
-	frame.Color = Config.Cave.BarColor
-	frame.Material = Enum.Material.Metal
-	frame.Anchored = true
-	frame.Parent = parent
+	local gate = Instance.new("Model")
+	gate.Name = "IronGate"
+	gate.Parent = parent
 
-	local function attach(part: BasePart)
+	local function bar(name: string, size: Vector3, offset: CFrame): Part
+		local part = Instance.new("Part")
+		part.Name = name
+		part.Size = size
+		part.CFrame = origin * offset
 		part.Color = Config.Cave.BarColor
 		part.Material = Enum.Material.Metal
-		part.Anchored = false
+		part.Reflectance = 0.1
+		part.Anchored = true
 		part.CanCollide = true
-		part.Massless = true
-		part.Parent = parent
-
-		local weld = Instance.new("WeldConstraint")
-		weld.Part0 = frame
-		weld.Part1 = part
-		weld.Parent = frame
+		part.TopSurface = Enum.SurfaceType.Smooth
+		part.BottomSurface = Enum.SurfaceType.Smooth
+		part.Parent = gate
+		return part
 	end
+
+	-- The top rail doubles as the model's pivot: everything moves with it.
+	local frame = bar("GateFrame", Vector3.new(width + 2, 1.6, 1.6), CFrame.new(0, height - 0.8, 0))
+	gate.PrimaryPart = frame
 
 	for index = 1, Config.Cave.BarCount do
 		local offset = -width / 2 + (index - 0.5) * (width / Config.Cave.BarCount)
-		local bar = Instance.new("Part")
-		bar.Name = "Bar"
-		bar.Size = Vector3.new(Config.Cave.BarThickness, height, Config.Cave.BarThickness)
-		bar.CFrame = origin * CFrame.new(offset, height / 2, 0)
-		attach(bar)
+		bar(
+			"Bar",
+			Vector3.new(Config.Cave.BarThickness, height, Config.Cave.BarThickness),
+			CFrame.new(offset, height / 2, 0)
+		)
 	end
 
-	-- Two crossbars, so it reads as a gate rather than a row of poles.
-	for _, fraction in { 0.3, 0.72 } do
-		local rail = Instance.new("Part")
-		rail.Name = "Crossbar"
-		rail.Size = Vector3.new(width, 1, 1)
-		rail.CFrame = origin * CFrame.new(0, height * fraction, 0)
-		attach(rail)
+	-- Crossbars, so it reads as a gate rather than a row of poles.
+	for _, fraction in { 0.28, 0.7 } do
+		bar("Crossbar", Vector3.new(width, 1.1, 1.1), CFrame.new(0, height * fraction, 0))
 	end
 
-	return frame
+	return gate
 end
 
--- Raises the gate, then drops it again after CloseAfter seconds.
-local function openGate(frame: BasePart, closedCFrame: CFrame)
+--[[
+	Raises the gate, then drops it shut again.
+
+	Moved by hand rather than with TweenService: a tween animates one
+	instance, and this is a Model of anchored parts that has to move together.
+	PivotTo does exactly that, so the loop just walks the pivot upward.
+]]
+local function slideGate(gate: Model, from: CFrame, to: CFrame, duration: number)
+	local elapsed = 0
+
+	while elapsed < duration and gate.Parent do
+		elapsed += task.wait()
+		local alpha = math.min(elapsed / duration, 1)
+		-- Ease out, so it starts fast and settles rather than stopping dead.
+		local eased = 1 - (1 - alpha) * (1 - alpha)
+		gate:PivotTo(from:Lerp(to, eased))
+	end
+
+	if gate.Parent then
+		gate:PivotTo(to)
+	end
+end
+
+local function openGate(gate: Model, closed: CFrame)
 	if gateBusy then
 		return
 	end
 	gateBusy = true
 
-	local lift = Config.Cave.MouthHeight + 2
-	local info = TweenInfo.new(Config.Cave.OpenTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-
-	TweenService:Create(frame, info, { CFrame = closedCFrame * CFrame.new(0, lift, 0) }):Play()
+	local open = closed * CFrame.new(0, Config.Cave.MouthHeight + 2, 0)
+	slideGate(gate, closed, open, Config.Cave.OpenTime)
 
 	if Config.Cave.CloseAfter <= 0 then
 		return
 	end
 
-	task.delay(Config.Cave.OpenTime + Config.Cave.CloseAfter, function()
-		local shut = TweenService:Create(frame, info, { CFrame = closedCFrame })
-		shut:Play()
-		shut.Completed:Wait()
-		gateBusy = false
-	end)
+	task.wait(Config.Cave.CloseAfter)
+	slideGate(gate, open, closed, Config.Cave.OpenTime)
+	gateBusy = false
 end
 
 function CaveService:Start()
@@ -289,8 +366,8 @@ function CaveService:Start()
 	buildMound(origin, folder)
 	buildEntrance(origin, folder)
 
-	local frame = buildGate(origin, folder)
-	local closedCFrame = frame.CFrame
+	local gate = buildGate(origin, folder)
+	local closedPivot = gate:GetPivot()
 
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "EnterPrompt"
@@ -299,10 +376,12 @@ function CaveService:Start()
 	prompt.MaxActivationDistance = Config.Cave.PromptDistance
 	prompt.HoldDuration = Config.Cave.HoldDuration
 	prompt.RequiresLineOfSight = false
-	prompt.Parent = frame
+	prompt.Parent = gate.PrimaryPart
 
 	prompt.Triggered:Connect(function()
-		openGate(frame, closedCFrame)
+		-- Opening yields, so it runs on its own thread rather than blocking
+		-- the prompt from firing again.
+		task.spawn(openGate, gate, closedPivot)
 	end)
 
 	print("[Cave] built, gate shut.")

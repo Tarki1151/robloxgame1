@@ -114,32 +114,59 @@ Config.Cave = {
 	-- Which way the mouth faces. Toward the spawn, so it is visible walking out.
 	Facing = Vector3.new(0.35, 0, 1),
 	-- The rock mound.
-	MoundRadius = 34,
-	MoundHeight = 26,
-	BoulderCount = 14,
+	MoundRadius = 62,
+	MoundHeight = 48,
+	-- Boulders in the outer ring, the inner ring, and scattered as rubble.
+	BoulderCount = 26,
+	InnerCount = 14,
+	RubbleCount = 22,
 	RockColor = Color3.fromRGB(74, 70, 68),
 	RockDarkColor = Color3.fromRGB(52, 49, 48),
+	RockLightColor = Color3.fromRGB(92, 88, 84),
 	-- The entrance.
-	MouthWidth = 16,
-	MouthHeight = 14,
+	MouthWidth = 20,
+	MouthHeight = 18,
 	-- The chamber behind it.
-	ChamberSize = Vector3.new(44, 20, 44),
-	TunnelLength = 22,
+	ChamberSize = Vector3.new(76, 30, 76),
+	TunnelLength = 30,
 	GlowColor = Color3.fromRGB(120, 180, 255),
+	-- Stalagmites and stalactites inside.
+	SpikeCount = 18,
 	-- Iron bars across the mouth.
-	BarCount = 9,
-	BarThickness = 0.9,
+	BarCount = 11,
+	BarThickness = 1.1,
 	BarColor = Color3.fromRGB(42, 44, 48),
-	-- How long the gate takes to grind open, and how far it lifts.
-	OpenTime = 1.6,
+	-- How long the gate takes to grind open.
+	OpenTime = 1.8,
 	-- Seconds the gate stays open before dropping shut again. 0 keeps it open.
-	CloseAfter = 12,
+	CloseAfter = 15,
 	-- How close you must be for the prompt to appear.
-	PromptDistance = 18,
+	PromptDistance = 22,
 	PromptAction = "Enter",
 	PromptObject = "Cave",
 	-- Held rather than tapped, so it is a deliberate choice.
 	HoldDuration = 0.6,
+}
+
+-- What stands inside the castle walls.
+Config.Keep = {
+	-- The central building.
+	Size = Vector3.new(34, 30, 30),
+	RoofHeight = 8,
+	DoorWidth = 8,
+	DoorHeight = 12,
+	-- Steps up to the wall walk.
+	StairCount = 10,
+	StairWidth = 8,
+	-- Props scattered round the courtyard.
+	BarrelCount = 7,
+	CrateCount = 6,
+	TorchCount = 8,
+	WoodColor = Color3.fromRGB(94, 66, 42),
+	WoodDarkColor = Color3.fromRGB(68, 48, 32),
+	MetalColor = Color3.fromRGB(74, 74, 80),
+	FlameColor = Color3.fromRGB(255, 164, 62),
+	WellColor = Color3.fromRGB(108, 104, 98),
 }
 
 return Config

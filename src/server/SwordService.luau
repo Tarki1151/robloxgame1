@@ -16,41 +16,10 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 
+local SwingPose = require(script.Parent.SwingPose)
+local SwordModel = require(script.Parent.SwordModel)
+
 local SwordService = {}
-
-local function buildSword(): Tool
-	local tool = Instance.new("Tool")
-	tool.Name = Config.Sword.Name
-	tool.CanBeDropped = false
-	tool.Grip = CFrame.new(0, 0, -1.5) * CFrame.Angles(math.pi / 2, 0, math.pi / 2)
-
-	local handle = Instance.new("Part")
-	handle.Name = "Handle"
-	handle.Size = Vector3.new(0.8, Config.Sword.Reach, 0.8)
-	handle.Color = Config.Sword.BladeColor
-	handle.Material = Enum.Material.Metal
-	handle.Reflectance = 0.15
-	handle.CanCollide = false
-	handle.Parent = tool
-
-	local guard = Instance.new("Part")
-	guard.Name = "Guard"
-	guard.Size = Vector3.new(2, 0.35, 0.35)
-	guard.Color = Config.Sword.GripColor
-	guard.Material = Enum.Material.Metal
-	guard.CanCollide = false
-	guard.CanQuery = false
-	guard.Massless = true
-	guard.Parent = tool
-
-	local weld = Instance.new("Weld")
-	weld.Part0 = handle
-	weld.Part1 = guard
-	weld.C0 = CFrame.new(0, -Config.Sword.Reach / 2 + 0.5, 0)
-	weld.Parent = handle
-
-	return tool
-end
 
 -- Hit resolution: anything the blade touches during a swing takes damage
 -- once, with a per-target debounce so one swing cannot tick repeatedly.
@@ -92,6 +61,12 @@ local function arm(tool: Tool, owner: Player)
 		lastSwing = now
 		swingUntil = now + Config.Sword.HitWindow
 		table.clear(struck)
+
+		local character = owner.Character
+		if character then
+			local trail = handle:FindFirstChild("SlashTrail")
+			SwingPose.play(character, if trail and trail:IsA("Trail") then trail else nil)
+		end
 	end)
 end
 
@@ -119,34 +94,55 @@ local function buildPedestal(position: Vector3, parent: Instance): BasePart
 	column.Anchored = true
 	column.Parent = model
 
-	-- The display sword: a second, static copy. Handing out the real Tool
-	-- would leave the pedestal empty for everyone else.
-	local blade = Instance.new("Part")
-	blade.Name = "DisplayBlade"
-	blade.Size = Vector3.new(0.8, Config.Sword.Reach, 0.8)
-	blade.Position = position + Vector3.new(0, 11, 0)
-	blade.Color = Config.Sword.BladeColor
-	blade.Material = Enum.Material.Metal
-	blade.Reflectance = 0.2
-	blade.Anchored = true
-	blade.CanCollide = false
-	blade.Parent = model
+	--[[
+		The display sword: a static copy standing point-down in the stone.
 
-	local guard = Instance.new("Part")
-	guard.Name = "DisplayGuard"
-	guard.Size = Vector3.new(2.4, 0.4, 0.4)
-	guard.Position = position + Vector3.new(0, 11 - Config.Sword.Reach / 2 + 0.5, 0)
-	guard.Color = Config.Sword.GripColor
-	guard.Material = Enum.Material.Metal
-	guard.Anchored = true
-	guard.CanCollide = false
-	guard.Parent = model
+		Built by the same code as the real one, so the pedestal always shows
+		exactly the sword you are about to receive rather than a lookalike
+		that drifts out of date as the real one changes.
+
+		The parts are positioned by hand rather than by moving the Handle and
+		letting the welds follow. Welds are solved by the physics step, and
+		these parts are anchored immediately - they would freeze where they
+		were built, scattered around the origin, before any weld ran. Since
+		every part was welded to a Handle sitting at the identity CFrame, each
+		part's own CFrame is exactly its offset from the grip, so placing the
+		sword is one multiply per part.
+	]]
+	local display = SwordModel.build()
+	local standing = CFrame.new(position + Vector3.new(0, 10.5, 0)) * CFrame.Angles(0, 0, math.pi)
+
+	local displayHandle: BasePart? = nil
+
+	for _, item in display:GetChildren() do
+		if item:IsA("BasePart") then
+			item.CFrame = standing * item.CFrame
+			item.Anchored = true
+			item.CanCollide = false
+
+			-- The welds have done their job; keeping them on anchored parts
+			-- only invites the physics solver to argue with the placement.
+			for _, child in item:GetChildren() do
+				if child:IsA("Weld") or child:IsA("WeldConstraint") then
+					child:Destroy()
+				end
+			end
+
+			if item.Name == "Handle" then
+				displayHandle = item
+			end
+
+			item.Parent = model
+		end
+	end
+
+	display:Destroy()
 
 	local glow = Instance.new("PointLight")
 	glow.Color = Config.Sword.GlowColor
 	glow.Brightness = 2
 	glow.Range = 20
-	glow.Parent = blade
+	glow.Parent = displayHandle or column
 
 	return column
 end
@@ -185,7 +181,7 @@ function SwordService:Start()
 			return
 		end
 
-		local tool = buildSword()
+		local tool = SwordModel.build()
 		arm(tool, player)
 		tool.Parent = backpack
 		humanoid:EquipTool(tool)

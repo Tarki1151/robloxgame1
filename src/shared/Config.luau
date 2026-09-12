@@ -186,11 +186,54 @@ Config.Sword = {
 	Name = "Classic Sword",
 	Damage = 20,
 	Cooldown = 0.6,
+	-- How long the blade deals damage after a swing starts.
 	HitWindow = 0.35,
+	-- The same target cannot be hit twice inside this window.
 	HitDebounce = 0.5,
-	Reach = 4.4,
-	BladeColor = Color3.fromRGB(163, 162, 165),
-	GripColor = Color3.fromRGB(70, 70, 75),
+
+	-- Geometry. The blade is built in sections so it can taper and carry a
+	-- fuller, rather than being one flat slab.
+	GripLength = 2.2,
+	GripWidth = 0.55,
+	GuardWidth = 3.6,
+	GuardThickness = 0.45,
+	BladeLength = 5.6,
+	BladeWidth = 0.85,
+	BladeThickness = 0.22,
+	-- Width at the point, as a fraction of the width at the guard.
+	TipTaper = 0.55,
+	-- The groove down the middle of the blade.
+	FullerWidth = 0.3,
+	FullerDepth = 0.12,
+	PommelSize = 0.75,
+
+	SteelColor = Color3.fromRGB(196, 199, 206),
+	SteelDarkColor = Color3.fromRGB(128, 132, 140),
+	GuardColor = Color3.fromRGB(92, 78, 48),
+	GripColor = Color3.fromRGB(58, 38, 30),
+	-- Polished steel catches the light; leather does not.
+	SteelReflectance = 0.35,
+
+	--[[
+		The swing.
+
+		Roblox animations are uploaded assets - built in the Animation Editor,
+		published, and played by ID. None can be produced from a repo, so the
+		swing drives the arm joint directly instead. Same result, nothing to
+		download, and every number below is tunable.
+	]]
+	SwingDuration = 0.42,
+	-- Radians the shoulder travels: back on the windup, forward on the cut.
+	WindupAngle = 0.9,
+	SwingAngle = 2.5,
+	-- Fraction of the swing spent winding up before the cut starts.
+	WindupFraction = 0.3,
+	-- How far the body turns into the cut.
+	TorsoTwist = 0.35,
+	-- Trail behind the blade while the cut is live.
+	TrailLifetime = 0.25,
+	TrailColor = Color3.fromRGB(236, 244, 255),
+
 	-- Where it stands, relative to the castle centre.
 	PedestalOffset = Vector3.new(16, 0, 14),
 	PedestalColor = Color3.fromRGB(108, 104, 98),

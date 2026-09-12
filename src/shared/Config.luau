@@ -126,6 +126,9 @@ Config.Cave = {
 	-- The entrance.
 	MouthWidth = 20,
 	MouthHeight = 18,
+	-- Studs of clear ground either side of the mouth. Any rock overlapping
+	-- this corridor is skipped, so the entrance cannot be built shut.
+	MouthClearance = 10,
 	-- The chamber behind it.
 	ChamberSize = Vector3.new(76, 30, 76),
 	TunnelLength = 30,

@@ -39,13 +39,35 @@ local function rock(name: string, size: Vector3, cframe: CFrame, color: Color3, 
 end
 
 --[[
-	The mound.
+	The clear corridor in front of the mouth.
 
-	Three layers of boulders rather than one ring: an outer ring of large
-	lumps, an inner ring stacked higher and pulled back, and small rubble
-	scattered round the base. Overlapping lumps of different sizes and angles
-	read as rock; a single dome reads as a bubble, and one even ring reads as
-	a fence.
+	Rock is placed by angle around the mound, which sooner or later drops a
+	boulder over the entrance - that is what was blocking it. Rather than
+	widening the excluded arc and hoping, every piece is tested against an
+	actual corridor: a box running from just inside the mouth straight out
+	past the foot of the hill. Anything overlapping it is skipped, whatever
+	ring it came from.
+
+	x and z are in the cave's local space: the mouth faces +z, the tunnel runs
+	into -z.
+]]
+local function blocksMouth(x: number, z: number, sizeX: number, sizeZ: number): boolean
+	local clearHalfWidth = Config.Cave.MouthWidth / 2 + Config.Cave.MouthClearance
+	local insideMouth = -4
+
+	local overlapsWidth = math.abs(x) - sizeX / 2 < clearHalfWidth
+	local overlapsDepth = z + sizeZ / 2 > insideMouth
+
+	return overlapsWidth and overlapsDepth
+end
+
+--[[
+	The mound, built from blocks only.
+
+	Boulders are rectangular slabs, each rotated on all three axes and sized
+	differently. Rotation is what sells it: an un-rotated block reads as a
+	wall, while the same block tipped and turned reads as a slab of stone, and
+	enough of them overlapping read as a hill.
 
 	The variation is deterministic - driven by sin and cos of the index rather
 	than math.random - so the cave looks the same every run instead of
@@ -54,12 +76,6 @@ end
 local function buildMound(origin: CFrame, parent: Instance)
 	local radius = Config.Cave.MoundRadius
 	local height = Config.Cave.MoundHeight
-
-	local function boulder(name: string, size: Vector3, cframe: CFrame, color: Color3)
-		local part = rock(name, size, cframe, color, parent)
-		part.Shape = Enum.PartType.Ball
-		return part
-	end
 
 	local function palette(index: number): Color3
 		if index % 3 == 0 then
@@ -70,72 +86,91 @@ local function buildMound(origin: CFrame, parent: Instance)
 		return Config.Cave.RockColor
 	end
 
-	-- The arc left open for the mouth, in radians either side of the front.
-	local function isMouth(angle: number): boolean
-		return math.abs(angle - math.pi / 2) < 0.42
+	-- Places one slab unless it would stand in the entrance.
+	local function slab(
+		name: string,
+		index: number,
+		x: number,
+		y: number,
+		z: number,
+		size: Vector3,
+		tilt: Vector3
+	)
+		if blocksMouth(x, z, size.X, size.Z) then
+			return
+		end
+
+		rock(
+			name,
+			size,
+			origin * CFrame.new(x, y, z) * CFrame.Angles(tilt.X, tilt.Y, tilt.Z),
+			palette(index),
+			parent
+		)
 	end
 
 	-- Outer ring: the wide base of the hill.
 	for index = 1, Config.Cave.BoulderCount do
 		local angle = (index / Config.Cave.BoulderCount) * math.pi * 2
-		if not isMouth(angle) then
-			local wobble = math.sin(index * 2.4)
-			local distance = radius * (0.68 + wobble * 0.14)
-			local size = height * (0.52 + math.cos(index * 1.7) * 0.2)
+		local wobble = math.sin(index * 2.4)
+		local distance = radius * (0.68 + wobble * 0.14)
+		local size = height * (0.5 + math.cos(index * 1.7) * 0.2)
 
-			boulder(
-				"Boulder",
-				Vector3.new(size * 1.7, size * 1.15, size * 1.5),
-				origin
-					* CFrame.new(math.cos(angle) * distance, size * 0.3 - 4, math.sin(angle) * distance)
-					* CFrame.Angles(wobble * 0.35, angle, math.cos(index) * 0.25),
-				palette(index)
-			)
-		end
+		slab(
+			"Boulder",
+			index,
+			math.cos(angle) * distance,
+			size * 0.3 - 5,
+			math.sin(angle) * distance,
+			Vector3.new(size * 1.6, size * 1.1, size * 1.4),
+			Vector3.new(wobble * 0.4, angle, math.cos(index) * 0.35)
+		)
 	end
 
 	-- Inner ring: pulled back and stacked higher, so the hill rises rather
 	-- than staying flat-topped.
 	for index = 1, Config.Cave.InnerCount do
 		local angle = (index / Config.Cave.InnerCount) * math.pi * 2
-		if not isMouth(angle) then
-			local wobble = math.cos(index * 3.1)
-			local distance = radius * (0.34 + wobble * 0.1)
-			local size = height * (0.6 + math.sin(index * 2.2) * 0.18)
+		local wobble = math.cos(index * 3.1)
+		local distance = radius * (0.36 + wobble * 0.1)
+		local size = height * (0.58 + math.sin(index * 2.2) * 0.18)
 
-			boulder(
-				"BoulderInner",
-				Vector3.new(size * 1.5, size * 1.25, size * 1.4),
-				origin
-					* CFrame.new(math.cos(angle) * distance, size * 0.55, math.sin(angle) * distance - 6)
-					* CFrame.Angles(wobble * 0.3, angle * 1.4, wobble * 0.2),
-				palette(index + 1)
-			)
-		end
+		slab(
+			"BoulderInner",
+			index + 1,
+			math.cos(angle) * distance,
+			size * 0.55,
+			math.sin(angle) * distance - 8,
+			Vector3.new(size * 1.4, size * 1.2, size * 1.3),
+			Vector3.new(wobble * 0.35, angle * 1.4, wobble * 0.3)
+		)
 	end
 
-	-- Crown, filling the top between the inner lumps.
-	boulder(
+	-- Crown, filling the top between the inner lumps. Set back far enough that
+	-- it roofs the mound without leaning over the entrance.
+	rock(
 		"MoundCap",
-		Vector3.new(radius * 1.25, height * 1.05, radius * 1.2),
-		origin * CFrame.new(0, height * 0.42, -12),
-		Config.Cave.RockColor
+		Vector3.new(radius * 1.1, height * 0.8, radius * 1.0),
+		origin * CFrame.new(0, height * 0.5, -radius * 0.42) * CFrame.Angles(0.12, 0.3, 0.06),
+		Config.Cave.RockColor,
+		parent
 	)
 
-	-- Rubble round the base, spilling toward the mouth so the entrance looks
-	-- worn rather than cut.
+	-- Rubble round the base, so the mound meets the ground in broken stone
+	-- rather than a clean line.
 	for index = 1, Config.Cave.RubbleCount do
 		local angle = index * 2.399
 		local distance = radius * (0.55 + math.sin(index * 1.3) * 0.45)
 		local size = 3 + math.abs(math.cos(index * 1.9)) * 6
 
-		boulder(
+		slab(
 			"Rubble",
+			index + 2,
+			math.cos(angle) * distance,
+			size * 0.25 - 2,
+			math.sin(angle) * distance,
 			Vector3.new(size * 1.4, size, size * 1.2),
-			origin
-				* CFrame.new(math.cos(angle) * distance, size * 0.25 - 1.5, math.sin(angle) * distance)
-				* CFrame.Angles(index * 0.4, angle, index * 0.27),
-			palette(index + 2)
+			Vector3.new(index * 0.4, angle, index * 0.27)
 		)
 	end
 end

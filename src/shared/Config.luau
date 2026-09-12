@@ -169,4 +169,50 @@ Config.Keep = {
 	WellColor = Color3.fromRGB(108, 104, 98),
 }
 
+Config.Player = {
+	WalkSpeed = 16,
+	-- Held Shift multiplies walk speed by this; releasing drops straight back.
+	SprintMultiplier = 2,
+	-- Seconds to reach full speed and to come back down. Instant changes feel
+	-- like teleporting rather than running.
+	SprintRamp = 0.18,
+}
+
+-- The sword waiting on a pedestal in the castle courtyard.
+Config.Sword = {
+	Name = "Classic Sword",
+	Damage = 20,
+	Cooldown = 0.6,
+	HitWindow = 0.35,
+	HitDebounce = 0.5,
+	Reach = 4.4,
+	BladeColor = Color3.fromRGB(163, 162, 165),
+	GripColor = Color3.fromRGB(70, 70, 75),
+	-- Where it stands, relative to the castle centre.
+	PedestalOffset = Vector3.new(16, 0, 14),
+	PedestalColor = Color3.fromRGB(108, 104, 98),
+	GlowColor = Color3.fromRGB(190, 220, 255),
+	PromptDistance = 14,
+	PromptAction = "Take",
+}
+
+--[[
+	The tutorial.
+
+	Steps are checked on the client by distance, except the last, which waits
+	for the server to say the sword was taken. Each step names the position it
+	is measuring against, so adding one is a row here rather than new code.
+]]
+Config.Tutorial = {
+	Enabled = true,
+	-- How close counts as arriving.
+	ArriveDistance = 26,
+	-- Seconds the finished message stays up before the panel fades.
+	FinishLinger = 4,
+	PanelColor = Color3.fromRGB(16, 15, 18),
+	AccentColor = Color3.fromRGB(255, 186, 84),
+	TextColor = Color3.fromRGB(240, 238, 244),
+	MutedColor = Color3.fromRGB(158, 154, 162),
+}
+
 return Config

@@ -10,6 +10,7 @@ local SERVICES = {
 	"GroundService",
 	"WorldService",
 	"CaveService",
+	"SwordService",
 }
 
 for _, name in SERVICES do

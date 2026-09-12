@@ -101,4 +101,45 @@ Config.Sign = {
 	TextColor = Color3.fromRGB(255, 246, 226),
 }
 
+--[[
+	The cave, its iron gate, and the chamber behind it.
+
+	Built from parts rather than terrain: GroundService clears terrain over
+	the whole world when it is in baseplate mode, which would eat a terrain
+	cave on the next run.
+]]
+Config.Cave = {
+	-- Off to one side of the path to the castle.
+	Position = Vector3.new(-190, 0, -140),
+	-- Which way the mouth faces. Toward the spawn, so it is visible walking out.
+	Facing = Vector3.new(0.35, 0, 1),
+	-- The rock mound.
+	MoundRadius = 34,
+	MoundHeight = 26,
+	BoulderCount = 14,
+	RockColor = Color3.fromRGB(74, 70, 68),
+	RockDarkColor = Color3.fromRGB(52, 49, 48),
+	-- The entrance.
+	MouthWidth = 16,
+	MouthHeight = 14,
+	-- The chamber behind it.
+	ChamberSize = Vector3.new(44, 20, 44),
+	TunnelLength = 22,
+	GlowColor = Color3.fromRGB(120, 180, 255),
+	-- Iron bars across the mouth.
+	BarCount = 9,
+	BarThickness = 0.9,
+	BarColor = Color3.fromRGB(42, 44, 48),
+	-- How long the gate takes to grind open, and how far it lifts.
+	OpenTime = 1.6,
+	-- Seconds the gate stays open before dropping shut again. 0 keeps it open.
+	CloseAfter = 12,
+	-- How close you must be for the prompt to appear.
+	PromptDistance = 18,
+	PromptAction = "Enter",
+	PromptObject = "Cave",
+	-- Held rather than tapped, so it is a deliberate choice.
+	HoldDuration = 0.6,
+}
+
 return Config

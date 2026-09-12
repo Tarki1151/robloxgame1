@@ -2,7 +2,12 @@
 
 An empty Rojo project, ready for a new Roblox game.
 
-The toolchain and CI are set up. The only gameplay code is `GroundService`,
+The toolchain and CI are set up. The only gameplay code is `CaveService` adds a rock mound with a barred cave mouth, a tunnel and a lit
+chamber behind it. The gate is shut: standing near it raises a
+ProximityPrompt, and holding it grinds the bars up. It drops shut again after
+`Config.Cave.CloseAfter` seconds - set that to 0 to leave it open.
+
+`GroundService`,
 which makes the ground grass, and `WorldService`, which builds a castle in
 the distance, a cobbled path leading to its gate, and a signpost with an
 arrow pointing the way.
@@ -12,6 +17,11 @@ corner towers with stepped roofs and banners, and a gatehouse - so there is
 no model to import and every dimension is a number in `Config.Castle`. The
 path and the sign both aim at the gate position the castle reports, rather
 than a location written down twice.
+
+`CaveService` adds a rock mound with a barred cave mouth, a tunnel and a lit
+chamber behind it. The gate is shut: standing near it raises a
+ProximityPrompt, and holding it grinds the bars up. It drops shut again after
+`Config.Cave.CloseAfter` seconds - set that to 0 to leave it open.
 
 `GroundService` By default it paints the baseplate grass green
 and leaves it solid and visible. Set `Config.Ground.UseTerrain = true` for

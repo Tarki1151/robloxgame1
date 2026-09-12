@@ -51,14 +51,31 @@ end
 	x and z are in the cave's local space: the mouth faces +z, the tunnel runs
 	into -z.
 ]]
-local function blocksMouth(x: number, z: number, sizeX: number, sizeZ: number): boolean
+local function blocksMouth(x: number, z: number, size: Vector3): boolean
 	local clearHalfWidth = Config.Cave.MouthWidth / 2 + Config.Cave.MouthClearance
 	local insideMouth = -4
 
-	local overlapsWidth = math.abs(x) - sizeX / 2 < clearHalfWidth
-	local overlapsDepth = z + sizeZ / 2 > insideMouth
+	--[[
+		Half the diagonal, not half the width.
+
+		Every boulder is rotated on all three axes, so its footprint is wider
+		than its own X and Z. Testing against those let rotated slabs poke
+		into the corridor and stand in the doorway - measuring the diagonal
+		is pessimistic, and pessimistic is what a doorway needs.
+	]]
+	local extent = size.Magnitude / 2
+
+	local overlapsWidth = math.abs(x) - extent < clearHalfWidth
+	local overlapsDepth = z + extent > insideMouth
 
 	return overlapsWidth and overlapsDepth
+end
+
+-- The furthest forward anything of this size may sit without reaching into
+-- the corridor. Used to seat the crown behind the entrance rather than
+-- dropping it and hoping.
+local function clearDepth(size: Vector3): number
+	return -4 - size.Magnitude / 2
 end
 
 --[[
@@ -96,7 +113,7 @@ local function buildMound(origin: CFrame, parent: Instance)
 		size: Vector3,
 		tilt: Vector3
 	)
-		if blocksMouth(x, z, size.X, size.Z) then
+		if blocksMouth(x, z, size) then
 			return
 		end
 
@@ -146,12 +163,20 @@ local function buildMound(origin: CFrame, parent: Instance)
 		)
 	end
 
-	-- Crown, filling the top between the inner lumps. Set back far enough that
-	-- it roofs the mound without leaning over the entrance.
+	--[[
+		Crown, filling the top between the inner lumps.
+
+		This was the piece standing in the doorway: it skipped the corridor
+		test, and at 60-odd studs deep it reached well past the mouth however
+		far back it was nudged. Its depth is now computed - seated just behind
+		the clear corridor - so it roofs the mound and cannot lean over the
+		entrance whatever size it is given.
+	]]
+	local capSize = Vector3.new(radius * 1.1, height * 0.8, radius * 0.9)
 	rock(
 		"MoundCap",
-		Vector3.new(radius * 1.1, height * 0.8, radius * 1.0),
-		origin * CFrame.new(0, height * 0.5, -radius * 0.42) * CFrame.Angles(0.12, 0.3, 0.06),
+		capSize,
+		origin * CFrame.new(0, height * 0.5, clearDepth(capSize)) * CFrame.Angles(0.12, 0.3, 0.06),
 		Config.Cave.RockColor,
 		parent
 	)

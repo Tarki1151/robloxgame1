@@ -215,6 +215,23 @@ Config.Sword = {
 	SteelReflectance = 0.35,
 
 	--[[
+		How the sword sits in the hand.
+
+		Tool.Grip is applied as an inverse: the Handle ends up at
+		hand * Grip:Inverse(). The blade runs along the Handle's +Y, and the
+		hand's -Z points forward, so turning +Y onto -Z takes a quarter turn
+		about X - that is GripPitch. GripRoll then rolls the blade about its
+		own length, which is what puts the flat of the blade vertical instead
+		of lying flat like a tray.
+
+		Both are here rather than buried in a CFrame because getting a grip
+		right is guesswork, and guessing is quicker against a number.
+	]]
+	GripPitch = math.pi / 2,
+	GripRoll = math.pi / 2,
+	GripOffset = Vector3.new(0, -0.3, 0),
+
+	--[[
 		The swing.
 
 		Roblox animations are uploaded assets - built in the Animation Editor,

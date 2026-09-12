@@ -63,8 +63,16 @@ function SwordModel.build(): Tool
 	local tool = Instance.new("Tool")
 	tool.Name = Config.Sword.Name
 	tool.CanBeDropped = false
-	-- Held point-forward, blade running away from the fist.
-	tool.Grip = CFrame.new(0, 0, 0) * CFrame.Angles(math.pi / 2, 0, math.pi / 2)
+	--[[
+		Held point-forward, flat of the blade vertical.
+
+		The old grip rolled a quarter turn about Z, which twisted the sword
+		sideways in the fist. The roll belongs about the blade's own axis -
+		Y - not about Z.
+	]]
+	tool.Grip = CFrame.new(Config.Sword.GripOffset)
+		* CFrame.Angles(Config.Sword.GripPitch, 0, 0)
+		* CFrame.Angles(0, Config.Sword.GripRoll, 0)
 
 	-- The grip is the Handle: wrapped leather, slightly waisted.
 	local handle = piece(

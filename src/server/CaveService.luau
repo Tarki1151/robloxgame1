@@ -18,6 +18,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 
+local SaveService = require(script.Parent.SaveService)
+
 local CaveService = {}
 
 -- Set while the gate is moving or open, so repeated triggers do not stack
@@ -438,7 +440,11 @@ function CaveService:Start()
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = gate.PrimaryPart
 
-	prompt.Triggered:Connect(function()
+	prompt.Triggered:Connect(function(player)
+		SaveService:Update(player, function(profile)
+			profile.CaveOpened = true
+		end)
+
 		-- Opening yields, so it runs on its own thread rather than blocking
 		-- the prompt from firing again.
 		task.spawn(openGate, gate, closedPivot)

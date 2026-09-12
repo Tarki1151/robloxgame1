@@ -13,6 +13,13 @@ local FOLDER_NAME = "Remotes"
 local EVENTS = {
 	-- Server -> Client
 	"SwordTaken",
+	"SlotsChanged",
+	"SaveNotice",
+	-- Client -> Server
+	"SelectSlot",
+	"CreateSlot",
+	"DeleteSlot",
+	"SaveNow",
 }
 
 local folder: Folder

@@ -7,6 +7,7 @@
 ]]
 
 local SERVICES = {
+	"SaveService",
 	"GroundService",
 	"WorldService",
 	"CaveService",

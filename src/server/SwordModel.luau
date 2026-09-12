@@ -180,25 +180,36 @@ function SwordModel.build(): Tool
 		)
 	end
 
-	-- The point: a wedge, so the blade ends in an edge rather than a flat end.
-	local tip = Instance.new("WedgePart")
-	tip.Name = "Tip"
-	tip.Size = Vector3.new(Config.Sword.BladeThickness, 1.1, tipWidth)
-	tip.Color = Config.Sword.SteelColor
-	tip.Material = Enum.Material.Metal
-	tip.Reflectance = Config.Sword.SteelReflectance
-	tip.CanCollide = false
-	tip.CanQuery = false
-	tip.Massless = true
-	tip.Parent = tool
+	--[[
+		The point, built from two angled blocks meeting at the tip.
 
-	weldTo(
-		handle,
-		tip,
-		CFrame.new(0, bladeBase + Config.Sword.BladeLength + 0.55, 0)
-			* CFrame.Angles(0, 0, math.pi / 2)
-			* CFrame.Angles(math.pi / 2, 0, 0)
-	)
+		A WedgePart would be the obvious choice and was what this used, but a
+		wedge's slope runs along an axis that is easy to get wrong and hard to
+		verify without looking at it - the tip ended up flat, or facing
+		sideways. Two blocks angled in toward each other make a symmetric point
+		that is correct by construction, from any angle, with no axis to guess.
+	]]
+	local tipLength = 1.3
+	local tipY = bladeBase + Config.Sword.BladeLength + tipLength / 2
+
+	for _, side in { -1, 1 } do
+		-- Each half leans in by the angle that closes the blade's half-width
+		-- over the length of the point.
+		local lean = math.atan((tipWidth / 2) / tipLength)
+
+		weldTo(
+			handle,
+			piece(
+				"Point",
+				Vector3.new(tipWidth / 2, tipLength + 0.25, Config.Sword.BladeThickness),
+				Config.Sword.SteelColor,
+				Enum.Material.Metal,
+				Config.Sword.SteelReflectance,
+				tool
+			),
+			CFrame.new(side * tipWidth / 4, tipY, 0) * CFrame.Angles(0, 0, side * lean)
+		)
+	end
 
 	--[[
 		The trail, drawn between the edge and the back of the blade.

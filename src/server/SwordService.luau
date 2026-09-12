@@ -16,6 +16,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 
+local SaveService = require(script.Parent.SaveService)
 local SwingPose = require(script.Parent.SwingPose)
 local SwordModel = require(script.Parent.SwordModel)
 
@@ -165,29 +166,58 @@ function SwordService:Start()
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = column
 
-	prompt.Triggered:Connect(function(player)
+	-- Hands a player the sword. Used by the prompt, and when a slot that
+	-- already has it is loaded.
+	local function give(player: Player): boolean
 		local backpack = player:FindFirstChildOfClass("Backpack")
 		local character = player.Character
 		local humanoid = if character then character:FindFirstChildOfClass("Humanoid") else nil
-		if not backpack or not humanoid then
-			return
+		if not backpack or not character or not humanoid then
+			return false
 		end
 
 		-- One each: taking it twice would just clutter the backpack.
-		if
-			backpack:FindFirstChild(Config.Sword.Name)
-			or (character and character:FindFirstChild(Config.Sword.Name))
-		then
-			return
+		if backpack:FindFirstChild(Config.Sword.Name) or character:FindFirstChild(Config.Sword.Name) then
+			return false
 		end
 
 		local tool = SwordModel.build()
 		arm(tool, player)
 		tool.Parent = backpack
 		humanoid:EquipTool(tool)
+		return true
+	end
+
+	prompt.Triggered:Connect(function(player)
+		if not give(player) then
+			return
+		end
+
+		SaveService:Update(player, function(profile)
+			profile.SwordTaken = true
+		end)
 
 		Remotes.event("SwordTaken"):FireClient(player)
 	end)
+
+	--[[
+		Loading a slot that already has the sword hands it straight back, so
+		continuing a run does not mean walking to the pedestal again.
+
+		Deferred: the slot can be chosen before the character exists, and
+		there is nothing to hand a sword to until it does.
+	]]
+	SaveService.SlotLoaded = function(player: Player, profile)
+		if not profile.SwordTaken then
+			return
+		end
+
+		task.defer(function()
+			if give(player) then
+				Remotes.event("SwordTaken"):FireClient(player)
+			end
+		end)
+	end
 
 	print("[Sword] pedestal placed in the courtyard.")
 end

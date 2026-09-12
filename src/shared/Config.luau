@@ -278,4 +278,53 @@ Config.Tutorial = {
 	MutedColor = Color3.fromRGB(158, 154, 162),
 }
 
+--[[
+	Saving.
+
+	Five slots per player, each an independent run. A slot holds everything
+	worth restoring: what has been done, and where you were standing.
+
+	Adding a field to DefaultProfile is all that is needed to start saving it -
+	old saves are filled in with the default when they load, so a new field
+	never breaks an existing slot.
+]]
+Config.Save = {
+	-- Bump this if the shape of a profile changes in a way old saves cannot
+	-- survive. Everything saved under the old name is then ignored.
+	StoreName = "Slots_v1",
+	SlotCount = 5,
+	-- Seconds between automatic saves of the active slot.
+	AutosaveInterval = 60,
+	-- Retries when a load fails, and the wait between them.
+	LoadRetries = 4,
+	RetryDelay = 1.5,
+
+	DefaultProfile = {
+		Version = 1,
+		-- Progress.
+		SwordTaken = false,
+		CaveOpened = false,
+		ReachedCastle = false,
+		TutorialDone = false,
+		-- Where to put the player when the slot is loaded.
+		PositionX = 0,
+		PositionY = 6,
+		PositionZ = 24,
+		-- Bookkeeping, shown on the slot tile.
+		PlaySeconds = 0,
+		CreatedAt = 0,
+		SavedAt = 0,
+	},
+}
+
+Config.SaveUi = {
+	Panel = Color3.fromRGB(16, 15, 18),
+	PanelEdge = Color3.fromRGB(58, 52, 58),
+	Accent = Color3.fromRGB(255, 186, 84),
+	Danger = Color3.fromRGB(206, 74, 66),
+	Text = Color3.fromRGB(240, 238, 244),
+	Muted = Color3.fromRGB(152, 148, 156),
+	SlotHeight = 74,
+}
+
 return Config

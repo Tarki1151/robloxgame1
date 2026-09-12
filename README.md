@@ -7,6 +7,16 @@ chamber behind it. The gate is shut: standing near it raises a
 ProximityPrompt, and holding it grinds the bars up. It drops shut again after
 `Config.Cave.CloseAfter` seconds - set that to 0 to leave it open.
 
+`SaveService` gives each player five save slots. A slot is picked before
+playing; progress goes through `SaveService:Update()`, which marks it dirty,
+and it is written on a timer, on leaving, and on shutdown. Adding a field to
+`Config.Save.DefaultProfile` is all that is needed to start saving it - old
+saves are filled in with the default when they load.
+
+Saving needs a published place with API services enabled. Without one the
+game still runs: `SaveService` warns once and plays against an in-memory
+profile rather than stalling.
+
 `GroundService`,
 which makes the ground grass, and `WorldService`, which builds a castle in
 the distance, a cobbled path leading to its gate, and a signpost with an
@@ -22,6 +32,16 @@ than a location written down twice.
 chamber behind it. The gate is shut: standing near it raises a
 ProximityPrompt, and holding it grinds the bars up. It drops shut again after
 `Config.Cave.CloseAfter` seconds - set that to 0 to leave it open.
+
+`SaveService` gives each player five save slots. A slot is picked before
+playing; progress goes through `SaveService:Update()`, which marks it dirty,
+and it is written on a timer, on leaving, and on shutdown. Adding a field to
+`Config.Save.DefaultProfile` is all that is needed to start saving it - old
+saves are filled in with the default when they load.
+
+Saving needs a published place with API services enabled. Without one the
+game still runs: `SaveService` warns once and plays against an in-memory
+profile rather than stalling.
 
 `GroundService` By default it paints the baseplate grass green
 and leaves it solid and visible. Set `Config.Ground.UseTerrain = true` for

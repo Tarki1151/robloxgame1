@@ -4,6 +4,7 @@
 ]]
 
 local CONTROLLERS = {
+	"SaveSlotController",
 	"SprintController",
 	"TutorialController",
 }

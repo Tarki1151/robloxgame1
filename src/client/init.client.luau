@@ -3,11 +3,7 @@
 	Empty on purpose: controllers get required and started from here.
 ]]
 
-local CONTROLLERS = {
-	"SaveSlotController",
-	"SprintController",
-	"TutorialController",
-}
+local CONTROLLERS = {}
 
 for _, name in CONTROLLERS do
 	local module = script:FindFirstChild(name)

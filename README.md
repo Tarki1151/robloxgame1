@@ -2,52 +2,7 @@
 
 An empty Rojo project, ready for a new Roblox game.
 
-The toolchain and CI are set up. The only gameplay code is `CaveService` adds a rock mound with a barred cave mouth, a tunnel and a lit
-chamber behind it. The gate is shut: standing near it raises a
-ProximityPrompt, and holding it grinds the bars up. It drops shut again after
-`Config.Cave.CloseAfter` seconds - set that to 0 to leave it open.
-
-`SaveService` gives each player five save slots. A slot is picked before
-playing; progress goes through `SaveService:Update()`, which marks it dirty,
-and it is written on a timer, on leaving, and on shutdown. Adding a field to
-`Config.Save.DefaultProfile` is all that is needed to start saving it - old
-saves are filled in with the default when they load.
-
-Saving needs a published place with API services enabled. Without one the
-game still runs: `SaveService` warns once and plays against an in-memory
-profile rather than stalling.
-
-`GroundService`,
-which makes the ground grass, and `WorldService`, which builds a castle in
-the distance, a cobbled path leading to its gate, and a signpost with an
-arrow pointing the way.
-
-The castle is built from parts at run time - four walls with battlements,
-corner towers with stepped roofs and banners, and a gatehouse - so there is
-no model to import and every dimension is a number in `Config.Castle`. The
-path and the sign both aim at the gate position the castle reports, rather
-than a location written down twice.
-
-`CaveService` adds a rock mound with a barred cave mouth, a tunnel and a lit
-chamber behind it. The gate is shut: standing near it raises a
-ProximityPrompt, and holding it grinds the bars up. It drops shut again after
-`Config.Cave.CloseAfter` seconds - set that to 0 to leave it open.
-
-`SaveService` gives each player five save slots. A slot is picked before
-playing; progress goes through `SaveService:Update()`, which marks it dirty,
-and it is written on a timer, on leaving, and on shutdown. Adding a field to
-`Config.Save.DefaultProfile` is all that is needed to start saving it - old
-saves are filled in with the default when they load.
-
-Saving needs a published place with API services enabled. Without one the
-game still runs: `SaveService` warns once and plays against an in-memory
-profile rather than stalling.
-
-`GroundService` By default it paints the baseplate grass green
-and leaves it solid and visible. Set `Config.Ground.UseTerrain = true` for
-real terrain grass instead, which renders grass blades and can be sculpted -
-that mode hides the baseplate underneath, since two solid surfaces at the
-same height flicker against each other.
+The toolchain and CI are set up; only the gameplay code is missing.
 
 ## Setup
 
@@ -104,12 +59,10 @@ wally install                 # install dependencies
 
 ## Previous work
 
-This repo previously held a beast-fighting game: an NPC built from scratch as
-an R6 rig, a twenty-beast roster, and a crafting forge. It was removed, not
-lost:
+Removed, not lost. To bring any of it back:
 
 ```bash
-git checkout 255ccb0 -- src
+git checkout 660f5ec -- src   # castle, cave, sword, sprint, tutorial, save slots
+git checkout 255ccb0 -- src   # beast roster, angel wings, crafting forge
+git checkout f77932d -- src   # bird-hunting simulator
 ```
-
-Before that it was a bird-hunting simulator, at `f77932d`.

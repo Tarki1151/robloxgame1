@@ -6,13 +6,7 @@
 	loading warns and is skipped instead of taking the whole server down.
 ]]
 
-local SERVICES = {
-	"SaveService",
-	"GroundService",
-	"WorldService",
-	"CaveService",
-	"SwordService",
-}
+local SERVICES = {}
 
 for _, name in SERVICES do
 	local module = script:FindFirstChild(name)
